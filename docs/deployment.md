@@ -100,9 +100,14 @@ on. Per-plugin kill switches need only an env var and restart:
 `CHUKEI_PLUGINS_CACHE_ENABLED=false`, `CHUKEI_PLUGINS_REWRITE_ENABLED=false`,
 `CHUKEI_PLUGINS_SUSPEND_ENABLED=false`.
 
-**If chukei itself dies**, clients pointed at it retry with backoff and
-then error — they do not silently fall back to Snowflake. This is why the
-restart policy in §3 is mandatory and the pilot scope in §4 is a subset.
+**If chukei itself dies** (measured, not assumed — we drill this):
+a restart faster than the driver's retry budget (~10s for the Python
+connector's defaults) is invisible to running clients; a longer outage
+surfaces as connection errors only after each query burns its retry
+budget. Clients do **not** silently fall back to Snowflake. On restart,
+existing sessions resume without re-login — chukei holds no session
+state. This is why the restart policy in §3 is mandatory and the pilot
+scope in §4 is a subset.
 
 ## 7. Known pilot limitations (by design)
 
