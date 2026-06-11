@@ -4,3 +4,9 @@
 *.sig
 report.json
 .DS_Store
+pilot.env
+pilot-data/
+pilot*.key
+*.evidence.json
+.env
+__pycache__/

@@ -28,6 +28,12 @@ impl DiskStore {
         std::fs::create_dir_all(&dir).map_err(|e| {
             Error::Storage(format!("cannot create cache dir {}: {e}", dir.display()))
         })?;
+        // Entries hold customer query results; keep them owner-only.
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(&dir, std::fs::Permissions::from_mode(0o700));
+        }
 
         // Rebuild the index from whatever survived the restart.
         let mut index = HashMap::new();
@@ -111,6 +117,11 @@ impl CacheStore for DiskStore {
         if std::fs::write(&tmp, &raw).is_err() {
             return;
         }
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(&tmp, std::fs::Permissions::from_mode(0o600));
+        }
         if std::fs::rename(&tmp, self.path_for(&key)).is_err() {
             let _ = std::fs::remove_file(&tmp);
             return;
@@ -177,6 +188,26 @@ mod tests {
             ttl: Duration::from_secs(3600),
             canonical_wall_clock_ms: 1000,
         }
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn cache_artifacts_are_owner_only() {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = tempfile::tempdir().unwrap();
+        let cache_dir = dir.path().join("cache");
+        let store = DiskStore::open(&cache_dir, 100).unwrap();
+        store.put([7u8; 32], entry("T1", 1_000));
+
+        let mode = |p: &Path| std::fs::metadata(p).unwrap().permissions().mode() & 0o777;
+        assert_eq!(mode(&cache_dir), 0o700, "cache dir must be owner-only");
+        let entry_file = std::fs::read_dir(&cache_dir)
+            .unwrap()
+            .next()
+            .unwrap()
+            .unwrap()
+            .path();
+        assert_eq!(mode(&entry_file), 0o600, "cache entries must be owner-only");
     }
 
     #[test]

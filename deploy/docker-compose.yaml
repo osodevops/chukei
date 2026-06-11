@@ -1,0 +1,22 @@
+# chukei pilot — docker compose. Mount your config + TLS material at
+# /etc/chukei. See docs/deployment.md.
+services:
+  chukei:
+    image: osodevops/chukei:latest
+    command: ["up", "--config", "/etc/chukei/chukei.yaml"]
+    restart: unless-stopped # mandatory: clients do not fall back if chukei dies
+    ports:
+      - "8443:8443"   # proxy (TLS)
+      - "9090:9090"   # /metrics + /healthz
+    volumes:
+      - /etc/chukei:/etc/chukei:ro
+      - chukei-data:/var/lib/chukei
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9090/healthz"]
+      interval: 10s
+      timeout: 2s
+      retries: 3
+    stop_grace_period: 30s # graceful drain on SIGTERM
+
+volumes:
+  chukei-data:

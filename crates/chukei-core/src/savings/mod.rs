@@ -119,6 +119,12 @@ impl Ledger {
     pub fn open(path: impl AsRef<Path>, pricing: Pricing) -> Result<Self> {
         let conn = rusqlite::Connection::open(path.as_ref())
             .map_err(|e| Error::Storage(format!("cannot open savings db: {e}")))?;
+        // Ledger rows carry query metadata; keep the db owner-only.
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::PermissionsExt;
+            let _ = std::fs::set_permissions(path.as_ref(), std::fs::Permissions::from_mode(0o600));
+        }
         Self::with_connection(conn, pricing)
     }
 
@@ -248,6 +254,17 @@ mod tests {
         // Unknown warehouse → default M (4 cr/hr)
         let (_, usd_default) = p.avoided(Some("MYSTERY"), 3_600_000);
         assert!((usd_default - 8.4).abs() < 1e-9, "{usd_default}");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn ledger_db_is_owner_only() {
+        use std::os::unix::fs::PermissionsExt;
+        let dir = tempfile::tempdir().unwrap();
+        let db = dir.path().join("savings.db");
+        let _ledger = Ledger::open(&db, pricing()).unwrap();
+        let mode = std::fs::metadata(&db).unwrap().permissions().mode() & 0o777;
+        assert_eq!(mode, 0o600, "savings db must be owner-only");
     }
 
     #[test]

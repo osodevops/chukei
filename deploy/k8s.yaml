@@ -1,0 +1,58 @@
+# chukei pilot — single-replica Deployment + Service.
+# Cache and ledger are per-instance: keep replicas at 1 for the pilot.
+# Config + TLS come from secrets you create:
+#   kubectl create secret generic chukei-config --from-file=chukei.yaml
+#   kubectl create secret tls chukei-tls --cert=tls.crt --key=tls.key
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chukei
+  labels: { app: chukei }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: chukei }
+  template:
+    metadata:
+      labels: { app: chukei }
+    spec:
+      terminationGracePeriodSeconds: 30 # graceful drain on SIGTERM
+      containers:
+        - name: chukei
+          image: osodevops/chukei:latest
+          args: ["up", "--config", "/etc/chukei/chukei.yaml"]
+          ports:
+            - { containerPort: 8443, name: proxy }
+            - { containerPort: 9090, name: observability }
+          livenessProbe:
+            httpGet: { path: /healthz, port: observability }
+            periodSeconds: 10
+          readinessProbe:
+            httpGet: { path: /healthz, port: observability }
+            periodSeconds: 5
+          resources:
+            requests: { cpu: 500m, memory: 256Mi }
+            limits: { memory: 1Gi }
+          volumeMounts:
+            - { name: config, mountPath: /etc/chukei/chukei.yaml, subPath: chukei.yaml, readOnly: true }
+            - { name: tls, mountPath: /etc/chukei/tls.crt, subPath: tls.crt, readOnly: true }
+            - { name: tls, mountPath: /etc/chukei/tls.key, subPath: tls.key, readOnly: true }
+            - { name: data, mountPath: /var/lib/chukei }
+      volumes:
+        - name: config
+          secret: { secretName: chukei-config }
+        - name: tls
+          secret: { secretName: chukei-tls }
+        - name: data
+          emptyDir: {} # pilot profile persists no result data at rest
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chukei
+  labels: { app: chukei }
+spec:
+  selector: { app: chukei }
+  ports:
+    - { name: proxy, port: 8443, targetPort: proxy }
+    - { name: observability, port: 9090, targetPort: observability }
