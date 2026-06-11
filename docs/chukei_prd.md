@@ -1263,6 +1263,12 @@ The lab is async, cold-path, and opt-in. Default config sets `lab.enabled: false
 
 ### 24.1 Licence: BSL 1.1 → Apache-2.0 (3-year auto-conversion)
 
+> **Decision 2026-06-11 (supersedes this section):** chukei ships under
+> **MIT**, matching kafka-backup's actual licence. The BSL analysis below is
+> kept for the record; we traded the 3-year SaaS-resale moat for
+> friction-free adoption — the kafka-backup playbook. Revisit if a hosted
+> chukei service becomes the commercial model.
+
 - **Why BSL?** It blocks Snowflake/Databricks/Keebo/Greybeam/Espresso from forking the data plane and reselling it as a SaaS for 3 years. After 3 years each release auto-converts to Apache-2.0, so the OSS commitment is real and irreversible.
 - **Same model as:** [Sentry](https://blog.sentry.io/2019/11/06/relicensing-sentry/), MariaDB MaxScale, [Bloomberg's bsl-license](https://github.com/bloomberg/bsl-license).
 - **What's allowed under BSL:**
