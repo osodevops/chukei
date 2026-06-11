@@ -1,0 +1,27 @@
+[package]
+name = "chukei-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+description.workspace = true
+repository.workspace = true
+homepage.workspace = true
+
+[[bin]]
+name = "chukei"
+path = "src/main.rs"
+
+[dependencies]
+chukei-core = { path = "../chukei-core" }
+tokio.workspace = true
+clap.workspace = true
+clap_complete.workspace = true
+axum-server.workspace = true
+reqwest.workspace = true
+anyhow.workspace = true
+serde_json.workspace = true
+serde_yaml.workspace = true
+tracing.workspace = true
+tracing-subscriber.workspace = true
+chrono.workspace = true
