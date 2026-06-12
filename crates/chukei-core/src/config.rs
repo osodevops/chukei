@@ -406,6 +406,13 @@ pub struct SuspendConfig {
     /// Recommend suspend when P(arrival within horizon) is below this.
     #[serde(default = "default_suspend_p_threshold")]
     pub p_threshold: f64,
+    /// Per-warehouse cooldown between suspend actions, seconds.
+    #[serde(default = "default_suspend_cooldown_secs")]
+    pub cooldown_secs: u64,
+}
+
+fn default_suspend_cooldown_secs() -> u64 {
+    300
 }
 
 fn default_suspend_min_observations() -> u64 {
@@ -428,6 +435,7 @@ impl Default for SuspendConfig {
             min_observations: default_suspend_min_observations(),
             horizon_secs: default_suspend_horizon_secs(),
             p_threshold: default_suspend_p_threshold(),
+            cooldown_secs: default_suspend_cooldown_secs(),
         }
     }
 }

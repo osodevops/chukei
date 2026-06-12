@@ -341,14 +341,14 @@ pub fn spawn_sweeper(state: Arc<ProxyState>) {
     let enforce = state.suspend_config.mode == crate::config::SuspendMode::Enforce;
     tokio::spawn(async move {
         let mut cooldown: HashMap<String, u64> = HashMap::new();
-        const COOLDOWN_MS: u64 = 5 * 60 * 1000;
+        let cooldown_ms: u64 = state.suspend_config.cooldown_secs.max(1) * 1000;
         loop {
             tokio::time::sleep(interval).await;
             let now = unix_ms();
             for warehouse in suspend.model.warehouses() {
                 if cooldown
                     .get(&warehouse)
-                    .is_some_and(|t| now.saturating_sub(*t) < COOLDOWN_MS)
+                    .is_some_and(|t| now.saturating_sub(*t) < cooldown_ms)
                 {
                     continue;
                 }
