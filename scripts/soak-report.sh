@@ -4,6 +4,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 DATA="$ROOT/pilot-data"
 FAIL=0
+# pilot.yaml interpolates ${SNOWFLAKE_ACCOUNT}
+[ -f "$ROOT/pilot.env" ] && { set -a; source "$ROOT/pilot.env"; set +a; }
 
 echo "── soak gates ──"
 
