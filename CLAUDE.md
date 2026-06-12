@@ -47,6 +47,15 @@ Workspace single-version. Any PR touching `crates/`, `Cargo.toml`,
 `Cargo.lock`, or `Dockerfile` must bump `[workspace.package].version`:
 patch for fixes, minor for any breaking change to `chukei-core`'s public API.
 
+## Releasing
+
+Always release via a **tag push** (`git tag -f vX.Y.Z <sha> && git push origin vX.Y.Z`),
+never `gh workflow run release.yml --ref <tag>`: under workflow_dispatch,
+`dist host` creates the GitHub release itself and the workflow's own
+"Create GitHub Release" step then collides ("already exists"). Note
+release-tagger's auto-tags can't trigger the release workflow
+(github.token), so push the tag yourself.
+
 ## Testing conventions
 
 - Every rewrite rule ships positive *and* negative tests (when it must not fire).
