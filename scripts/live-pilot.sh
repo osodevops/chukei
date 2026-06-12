@@ -148,14 +148,16 @@ if [ -n "${MISMATCH:-}" ] && [ "${MISMATCH%.*}" != "0" ]; then
 fi
 echo "  ✓ blame mismatches: ${MISMATCH:-0}"
 
-echo "── asserting interception (not just passthrough) ──"
-REWRITES=$(grep -c "rewrite applied" "$DATA/chukei.log" || true)
-HITS=$(grep -c "cache hit" "$DATA/chukei.log" || true)
-echo "  rewrites applied: $REWRITES, cache hits: $HITS"
-if [ "$REWRITES" -lt 1 ] || [ "$HITS" -lt 1 ]; then
-  echo "FAIL: chukei did not intercept live-driver traffic"
-  exit 1
-fi
+case " $STAGES " in *" core "*)
+  echo "── asserting interception (not just passthrough) ──"
+  REWRITES=$(grep -c "rewrite applied" "$DATA/chukei.log" || true)
+  HITS=$(grep -c "cache hit" "$DATA/chukei.log" || true)
+  echo "  rewrites applied: $REWRITES, cache hits: $HITS"
+  if [ "$REWRITES" -lt 1 ] || [ "$HITS" -lt 1 ]; then
+    echo "FAIL: chukei did not intercept live-driver traffic"
+    exit 1
+  fi ;;
+esac
 
 echo "── credential-leak audit (log, cache dir, ledger) ──"
 for needle in "$SNOWFLAKE_PASSWORD" "${PILOT_TEST_PAT:-__unset__}"; do

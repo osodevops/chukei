@@ -586,6 +586,16 @@ async fn login_request(State(state): State<Arc<ProxyState>>, request: Request) -
     if let Ok(resp) = serde_json::from_slice::<serde_json::Value>(&resp_body) {
         if let Some(token) = resp.pointer("/data/token").and_then(|t| t.as_str()) {
             let data = login.as_ref().and_then(|l| l.get("data"));
+            // Warehouse: the login response's sessionInfo is authoritative;
+            // fall back to the request's ?warehouse= query param. Without
+            // this the suspend model and per-warehouse savings pricing never
+            // see a warehouse name at all (shipped blind in ≤0.2.0).
+            let warehouse = resp
+                .pointer("/data/sessionInfo/warehouseName")
+                .and_then(|v| v.as_str())
+                .filter(|s| !s.is_empty())
+                .map(String::from)
+                .or_else(|| query_param(&parts.uri, "warehouse"));
             let session = Session {
                 user: data
                     .and_then(|d| d.get("LOGIN_NAME"))
@@ -595,6 +605,7 @@ async fn login_request(State(state): State<Arc<ProxyState>>, request: Request) -
                     .and_then(|d| d.get("CLIENT_APP_ID"))
                     .and_then(|v| v.as_str())
                     .map(String::from),
+                warehouse,
                 ..Default::default()
             };
             state
@@ -605,6 +616,14 @@ async fn login_request(State(state): State<Arc<ProxyState>>, request: Request) -
         }
     }
     respond(status, headers, resp_body)
+}
+
+/// Extract a query-string parameter from a request URI.
+fn query_param(uri: &axum::http::Uri, name: &str) -> Option<String> {
+    uri.query()?.split('&').find_map(|pair| {
+        let (k, v) = pair.split_once('=')?;
+        (k.eq_ignore_ascii_case(name) && !v.is_empty()).then(|| v.to_string())
+    })
 }
 
 /// Token renewal: drivers auto-renew on session expiry (error 390112) via
@@ -796,6 +815,18 @@ async fn query_request(State(state): State<Arc<ProxyState>>, request: Request) -
                 headers,
                 body,
             );
+        }
+    }
+
+    // USE WAREHOUSE switches the session's warehouse mid-stream; track it so
+    // suspend modelling and savings pricing follow the client.
+    if let sqlparser::ast::Statement::Use(sqlparser::ast::Use::Warehouse(name)) =
+        &analysis.statement
+    {
+        if let Some(token) = token_from_headers(&parts.headers) {
+            if let Some(session) = state.sessions.lock().unwrap().get_mut(&token) {
+                session.warehouse = Some(name.to_string().replace('"', ""));
+            }
         }
     }
 

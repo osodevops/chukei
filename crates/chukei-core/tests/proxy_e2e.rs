@@ -26,7 +26,11 @@ async fn start_mock_snowflake(stats: Arc<MockStats>) -> SocketAddr {
             post(|| async {
                 Json(serde_json::json!({
                     "success": true,
-                    "data": { "token": "mock-token-123", "masterToken": "mock-master" }
+                    "data": {
+                        "token": "mock-token-123",
+                        "masterToken": "mock-master",
+                        "sessionInfo": { "warehouseName": "MOCK_WH" }
+                    }
                 }))
             }),
         )
@@ -107,6 +111,49 @@ async fn post_query(proxy: SocketAddr, sql: &str) -> serde_json::Value {
         .json()
         .await
         .unwrap()
+}
+
+/// Reproducer for bug #3 (shipped ≤0.2.0): the login handler never stored
+/// the session's warehouse, so `session.warehouse` was always None on live
+/// traffic and the suspend model never observed a single arrival — suggest
+/// and enforce modes were both blind against real drivers. (The older
+/// enforce e2e test seeded the model directly and missed this.) The fix
+/// reads sessionInfo.warehouseName from the login response (fallback:
+/// ?warehouse= query param) and tracks USE WAREHOUSE statements.
+#[tokio::test]
+async fn suspend_model_observes_warehouse_from_real_session_flow() {
+    let stats = Arc::new(MockStats::default());
+    let upstream = start_mock_snowflake(stats.clone()).await;
+    let (proxy, state) = start_proxy_with_state(upstream, |c| {
+        c.plugins.suspend.enabled = true;
+    })
+    .await;
+
+    reqwest::Client::new()
+        .post(format!("http://{proxy}/session/v1/login-request"))
+        .json(&serde_json::json!({"data": {"LOGIN_NAME": "SARA"}}))
+        .send()
+        .await
+        .unwrap();
+
+    post_query(proxy, "SELECT id FROM customers").await;
+    let suspend = state.suspend_plugin().expect("suspend enabled");
+    assert_eq!(
+        suspend.model.warehouses(),
+        vec!["MOCK_WH".to_string()],
+        "model must observe the login session's warehouse via the full wire path"
+    );
+
+    // USE WAREHOUSE re-points the session; subsequent arrivals follow it.
+    post_query(proxy, "USE WAREHOUSE OTHER_WH").await;
+    post_query(proxy, "SELECT id FROM customers WHERE id = 7").await;
+    let mut seen = suspend.model.warehouses();
+    seen.sort();
+    assert_eq!(
+        seen,
+        vec!["MOCK_WH".to_string(), "OTHER_WH".to_string()],
+        "USE WAREHOUSE must re-point session attribution"
+    );
 }
 
 #[tokio::test]

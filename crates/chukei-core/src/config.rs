@@ -396,6 +396,26 @@ pub struct SuspendConfig {
     /// How often the background sweeper evaluates warehouses.
     #[serde(default = "default_sweep_interval_secs")]
     pub sweep_interval_secs: u64,
+    /// Arrivals the model must see per warehouse before it will recommend
+    /// anything (cold-start gate). Lower for pilots, keep high for prod.
+    #[serde(default = "default_suspend_min_observations")]
+    pub min_observations: u64,
+    /// "Would a query arrive within this window?" horizon, seconds.
+    #[serde(default = "default_suspend_horizon_secs")]
+    pub horizon_secs: f64,
+    /// Recommend suspend when P(arrival within horizon) is below this.
+    #[serde(default = "default_suspend_p_threshold")]
+    pub p_threshold: f64,
+}
+
+fn default_suspend_min_observations() -> u64 {
+    20
+}
+fn default_suspend_horizon_secs() -> f64 {
+    60.0
+}
+fn default_suspend_p_threshold() -> f64 {
+    0.2
 }
 
 impl Default for SuspendConfig {
@@ -405,6 +425,9 @@ impl Default for SuspendConfig {
             mode: default_suspend_mode(),
             role: None,
             sweep_interval_secs: default_sweep_interval_secs(),
+            min_observations: default_suspend_min_observations(),
+            horizon_secs: default_suspend_horizon_secs(),
+            p_threshold: default_suspend_p_threshold(),
         }
     }
 }

@@ -133,10 +133,47 @@ pub struct SuspendPlugin {
     config: SuspendConfig,
 }
 
+/// Does this statement consume warehouse compute? Metadata-only statements
+/// (SHOW, DESCRIBE, USE, EXPLAIN, session/transaction control) run on cloud
+/// services, so they must not reset the idle model — a monitoring loop
+/// polling SHOW WAREHOUSES would otherwise keep every warehouse "busy"
+/// forever. Unknown shapes default to true: counting phantom activity only
+/// delays a suspend, never breaks one.
+fn runs_on_warehouse(stmt: &sqlparser::ast::Statement) -> bool {
+    use sqlparser::ast::Statement as S;
+    !matches!(
+        stmt,
+        S::ShowVariable { .. }
+            | S::ShowVariables { .. }
+            | S::ShowTables { .. }
+            | S::ShowSchemas { .. }
+            | S::ShowDatabases { .. }
+            | S::ShowColumns { .. }
+            | S::ShowFunctions { .. }
+            | S::ShowObjects { .. }
+            | S::ShowViews { .. }
+            | S::ShowStatus { .. }
+            | S::ShowCollation { .. }
+            | S::ShowCreate { .. }
+            | S::ExplainTable { .. }
+            | S::Explain { .. }
+            | S::Use(_)
+            | S::Set(_)
+            | S::StartTransaction { .. }
+            | S::Commit { .. }
+            | S::Rollback { .. }
+    )
+}
+
 impl SuspendPlugin {
     pub fn new(config: SuspendConfig) -> Self {
         Self {
-            model: SuspendModel::default(),
+            model: SuspendModel {
+                min_observations: config.min_observations,
+                horizon_secs: config.horizon_secs,
+                p_threshold: config.p_threshold,
+                ..SuspendModel::default()
+            },
             config,
         }
     }
@@ -151,9 +188,24 @@ impl Plugin for SuspendPlugin {
         50
     }
 
-    /// The plugin only observes on the hot path; recommendations are pulled
-    /// by the daemon's background sweep, never inline with a query.
-    async fn decide(&self, ctx: &QueryContext<'_>) -> Result<Decision> {
+    /// The plugin only observes; recommendations are pulled by the daemon's
+    /// background sweep, never inline with a query.
+    async fn decide(&self, _ctx: &QueryContext<'_>) -> Result<Decision> {
+        Ok(Decision::Passthrough)
+    }
+
+    /// Arrivals are recorded post-result, NOT in `decide`, so that
+    /// (a) cache hits never count — a fully-cached dashboard must let its
+    /// warehouse sleep (the cache-hit path returns before `on_result`), and
+    /// (b) metadata-only statements never count — see `runs_on_warehouse`.
+    async fn on_result(
+        &self,
+        ctx: &QueryContext<'_>,
+        result: &crate::plugin::ResultSnapshot,
+    ) -> Result<()> {
+        if result.served_from_cache || !runs_on_warehouse(&ctx.analysis.statement) {
+            return Ok(());
+        }
         if let Some(warehouse) = &ctx.session.warehouse {
             let now_ms = std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -161,7 +213,7 @@ impl Plugin for SuspendPlugin {
                 .unwrap_or(0);
             self.model.record_arrival(warehouse, now_ms);
         }
-        Ok(Decision::Passthrough)
+        Ok(())
     }
 }
 
@@ -218,5 +270,92 @@ mod tests {
     fn unknown_warehouse_is_none() {
         let model = SuspendModel::default();
         assert_eq!(model.recommend("NOPE", 0), None);
+    }
+
+    use crate::plugin::{Plugin, QueryContext, ResultSnapshot, Session};
+    use crate::sql::analyze;
+
+    fn wh_session() -> Session {
+        Session {
+            warehouse: Some("WH".into()),
+            ..Default::default()
+        }
+    }
+
+    async fn feed(plugin: &SuspendPlugin, sql: &str, from_cache: bool) {
+        let analysis = analyze(sql).unwrap();
+        let session = wh_session();
+        let ctx = QueryContext {
+            analysis: &analysis,
+            session: &session,
+        };
+        let snapshot = ResultSnapshot {
+            served_from_cache: from_cache,
+            ..Default::default()
+        };
+        plugin.on_result(&ctx, &snapshot).await.unwrap();
+    }
+
+    #[tokio::test]
+    async fn metadata_statements_do_not_reset_idle() {
+        // Regression: a monitoring loop polling SHOW WAREHOUSES through the
+        // proxy must not keep the warehouse "busy" forever.
+        let p = SuspendPlugin::new(SuspendConfig::default());
+        feed(&p, "SELECT 1 FROM t", false).await;
+        let before = p
+            .model
+            .stats
+            .lock()
+            .unwrap()
+            .get("WH")
+            .map(|e| e.observations);
+        feed(&p, "SHOW WAREHOUSES", false).await;
+        feed(&p, "USE WAREHOUSE WH", false).await;
+        let after = p
+            .model
+            .stats
+            .lock()
+            .unwrap()
+            .get("WH")
+            .map(|e| e.observations);
+        assert_eq!(
+            before, after,
+            "metadata statements must not record arrivals"
+        );
+    }
+
+    #[tokio::test]
+    async fn cache_hits_do_not_reset_idle() {
+        // A fully-cached dashboard must let its warehouse sleep.
+        let p = SuspendPlugin::new(SuspendConfig::default());
+        feed(&p, "SELECT 1 FROM t", false).await;
+        let before = p
+            .model
+            .stats
+            .lock()
+            .unwrap()
+            .get("WH")
+            .map(|e| e.observations);
+        feed(&p, "SELECT 1 FROM t", true).await;
+        let after = p
+            .model
+            .stats
+            .lock()
+            .unwrap()
+            .get("WH")
+            .map(|e| e.observations);
+        assert_eq!(before, after, "cache hits must not record arrivals");
+    }
+
+    #[test]
+    fn model_gates_come_from_config() {
+        let p = SuspendPlugin::new(SuspendConfig {
+            min_observations: 3,
+            horizon_secs: 15.0,
+            p_threshold: 0.5,
+            ..Default::default()
+        });
+        assert_eq!(p.model.min_observations, 3);
+        assert!((p.model.horizon_secs - 15.0).abs() < f64::EPSILON);
     }
 }

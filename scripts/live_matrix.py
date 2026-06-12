@@ -49,6 +49,10 @@ def connect(**overrides):
         # AuthByPAT reads the `token` param (password= is silently ignored)
         kw["token"] = os.environ["PILOT_TEST_PAT"]
         kw["authenticator"] = "PROGRAMMATIC_ACCESS_TOKEN"
+    elif auth == "externalbrowser":
+        # Interactive: a browser window opens against Snowflake directly;
+        # only the token exchange transits chukei. Requires a human.
+        kw["authenticator"] = "externalbrowser"
     else:
         raise SystemExit(f"unknown PILOT_TEST_AUTH={auth}")
     kw.update(overrides)
@@ -185,7 +189,37 @@ def stage_concurrency(conn):
     ok(f"{n} parallel sessions × 8 queries: no errors, no lost writes")
 
 
-STAGES = {"core": stage_core, "shapes": stage_shapes, "concurrency": stage_concurrency}
+def stage_longrunning(conn):
+    """Queries that exceed the inline-result window (~45s) switch to
+    Snowflake's async result-polling flow (queryInProgress + result URL).
+    Both the implicit flow and the explicit async API must transit chukei."""
+    cur = conn.cursor()
+    cur.execute("USE SCHEMA CHUKEI_PILOT.PUBLIC")
+
+    t0 = time.time()
+    row = cur.execute("CALL SYSTEM$WAIT(50)").fetchone()
+    elapsed = time.time() - t0
+    assert elapsed >= 50, f"wait returned early: {elapsed:.0f}s"
+    assert "waited 50 seconds" in str(row[0]), row
+    ok(f"50s sync query via async polling flow ({elapsed:.0f}s wall)")
+
+    qid = cur.execute_async(
+        "SELECT COUNT(*) FROM TABLE(GENERATOR(ROWCOUNT => 5000000)) WHERE SYSTEM$WAIT(8) IS NOT NULL"
+    )["queryId"]
+    while conn.is_still_running(conn.get_query_status_throw_if_error(qid)):
+        time.sleep(1)
+    rcur = conn.cursor()
+    rcur.get_results_from_sfqid(qid)
+    assert rcur.fetchone() is not None
+    ok("explicit execute_async + status poll + get_results_from_sfqid")
+
+
+STAGES = {
+    "core": stage_core,
+    "shapes": stage_shapes,
+    "concurrency": stage_concurrency,
+    "longrunning": stage_longrunning,
+}
 
 if __name__ == "__main__":
     names = sys.argv[1:] or ["core"]
