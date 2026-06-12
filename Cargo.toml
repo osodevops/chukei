@@ -10,7 +10,7 @@ version = "0.2.1"
 edition = "2021"
 license = "MIT"
 authors = ["OSO"]
-description = "Open-source, transparent Snowflake/Databricks query proxy"
+description = "Open-source cost optimization engine for Snowflake — verified caching, auto-suspend, SQL rewriting, attribution; deploys as a transparent proxy"
 repository = "https://github.com/osodevops/chukei"
 homepage = "https://chukei.dev"
 

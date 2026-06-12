@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">chukei</h1>
   <p align="center">
-    A transparent, open-source proxy for Snowflake and Databricks that quietly cuts the bill
+    The open-source cost optimization engine for Snowflake — zero client changes
   </p>
 </p>
 
@@ -11,8 +11,10 @@
 
 ---
 
-**chukei** sits between your database driver (JDBC, snowflake-connector-python,
-dbt, …) and the warehouse, and transparently:
+**chukei** cuts your Snowflake bill automatically. It deploys as a
+transparent wire-protocol proxy in your own VPC: your drivers (JDBC,
+snowflake-connector-python, dbt, …) change one hostname and nothing else,
+and chukei transparently:
 
 1. **Caches** semantically-equivalent query results.
 2. **Routes** small reads to embedded DuckDB on Iceberg replicas.
@@ -23,10 +25,13 @@ dbt, …) and the warehouse, and transparently:
 
 No client changes. No SaaS sign-up. One binary.
 
-> Status: **pre-alpha** — the core (SQL fingerprinting, plugin bus, P0
-> plugins, replay simulator, proxy skeleton) builds and is tested; TLS
-> termination, Iceberg/Arrow cache backing, and DuckDB execution are in
-> flight. See [`docs/chukei_prd.md`](docs/chukei_prd.md) for the full spec.
+> Status: **pilot-ready** — live-validated against real Snowflake: TLS,
+> four auth modes, async/long-running queries, JDBC, enforce-mode suspend
+> (real `ALTER WAREHOUSE SUSPEND`, verified in `QUERY_HISTORY`), and a
+> 13.5-hour soak with 60k verified cache hits and **zero** mismatches.
+> Iceberg/Arrow cache backing and DuckDB routing are post-pilot. Full
+> spec: [`docs/chukei_prd.md`](docs/chukei_prd.md); deployment guide:
+> [`docs/deployment.md`](docs/deployment.md).
 
 ## Try the replay simulator (no Snowflake account changes)
 

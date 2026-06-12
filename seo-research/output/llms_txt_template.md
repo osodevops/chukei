@@ -6,11 +6,12 @@ does via its markdown export). Also ship `/markdown/` raw-page exports.
 
 ```markdown
 # chukei
-> chukei is an open-source (MIT) transparent proxy for Snowflake that cuts
-> compute costs with zero client changes: deterministic result caching
-> (verified against live Snowflake), SQL query rewriting, warehouse
-> auto-suspend, and per-team cost attribution — deployed as a single Rust
-> binary or Docker image in front of *.snowflakecomputing.com.
+> chukei is the open-source (MIT) cost optimization engine for Snowflake:
+> deterministic result caching (verified against live Snowflake), warehouse
+> auto-suspend, SQL query rewriting, and per-team cost attribution. It
+> deploys as a transparent wire-protocol proxy — a single Rust binary or
+> Docker image in front of *.snowflakecomputing.com — with zero client
+> changes.
 
 ## Core Topics
 - [Snowflake Cost Optimization Guide](https://{DOMAIN}/guides/snowflake-cost-optimization): the four waste buckets and the suspend → size → cache → rewrite hierarchy
