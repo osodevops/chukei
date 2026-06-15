@@ -48,9 +48,16 @@ docker run -d --restart unless-stopped \
   osodevops/chukei:latest up --config /etc/chukei/chukei.yaml
 ```
 
-or `deploy/docker-compose.yaml`, or `deploy/k8s.yaml` (liveness/readiness
-on `/healthz`, one replica — the cache is per-instance). chukei drains
-gracefully on SIGTERM.
+or `deploy/docker-compose.yaml`, `deploy/k8s.yaml`, or the Helm chart:
+
+```bash
+helm install chukei ./deploy/helm/chukei \
+  --set config.upstream.snowflake.account=abc12345.us-east-1
+```
+
+The Kubernetes deployment exposes liveness/readiness on `/healthz`, starts
+with one replica because the cache is per-instance, and drains gracefully on
+SIGTERM.
 
 ## 4. Point clients at it — a subset first
 

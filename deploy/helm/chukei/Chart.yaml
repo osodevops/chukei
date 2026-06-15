@@ -1,0 +1,14 @@
+apiVersion: v2
+name: chukei
+description: Fair-source Snowflake cost optimization proxy
+type: application
+version: 0.1.0
+appVersion: "0.2.2"
+home: https://github.com/osodevops/chukei
+sources:
+  - https://github.com/osodevops/chukei
+maintainers:
+  - name: OSO
+    url: https://oso.sh
+annotations:
+  licenses: FSL-1.1-ALv2

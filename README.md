@@ -100,6 +100,16 @@ docker run --rm -p 8443:8443 -p 9090:9090 \
 
 See the image on [Docker Hub](https://hub.docker.com/r/osodevops/chukei).
 
+### Kubernetes (Helm)
+
+```bash
+helm install chukei ./deploy/helm/chukei \
+  --set config.upstream.snowflake.account=abc12345.us-east-1
+```
+
+For production, provide a real `chukei.yaml` through `existingConfigSecret`
+and mount customer-owned TLS with `tls.existingSecret`.
+
 ### From Source
 
 ```bash
@@ -120,6 +130,7 @@ chukei replay --query-history queries.csv --output projection.json --evidence
 ```
 
 You get parse coverage, projected cache hit-rate, rewrite candidates, suspend savings, and an Ed25519-signed projection anyone can verify with `chukei evidence verify`.
+For a synthetic no-credential corpus, use [`demo/query-history.csv`](demo/query-history.csv).
 
 ## Quick Start
 
