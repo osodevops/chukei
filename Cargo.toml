@@ -28,7 +28,7 @@ serde_yaml = "0.9"
 sqlparser = { version = "0.62", features = ["visitor"] }
 blake3 = "1"
 flate2 = "1"
-prometheus-client = "0.24"
+prometheus-client = "0.25"
 rusqlite = { version = "0.40", features = ["bundled"] }
 clap_complete = "4"
 thiserror = "2"
