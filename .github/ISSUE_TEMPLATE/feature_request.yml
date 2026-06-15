@@ -1,0 +1,44 @@
+name: Feature request
+description: Suggest an improvement or new capability.
+title: "feat: "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What user pain does this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposal
+      description: What should chukei do?
+    validations:
+      required: true
+  - type: dropdown
+    id: target
+    attributes:
+      label: Target
+      description: Launch scope is Snowflake-only.
+      options:
+        - Snowflake
+        - Cross-cutting infrastructure
+        - Documentation
+        - Roadmap adapter or integration
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+  - type: checkboxes
+    id: constraints
+    attributes:
+      label: Constraints
+      options:
+        - label: This keeps the hot path deterministic.
+        - label: This preserves fail-open behavior.
+        - label: This does not require customer credentials or private query text in public artifacts.

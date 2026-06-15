@@ -211,7 +211,10 @@ We welcome contributions of all kinds!
 - **Suggest features:** [Request a feature](https://github.com/osodevops/chukei/issues)
 - **Improve docs:** PRs against [chukei-docs](https://github.com/osodevops/chukei-docs) welcome
 
-See [CLAUDE.md](CLAUDE.md) for development guidelines and the non-negotiable invariants (fail open, deterministic hot path, false-positive-intolerant cache).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution workflow,
+[SECURITY.md](SECURITY.md) for private vulnerability reporting, and
+[CLAUDE.md](CLAUDE.md) for development guidelines and the non-negotiable
+invariants (fail open, deterministic hot path, false-positive-intolerant cache).
 
 ## License
 
