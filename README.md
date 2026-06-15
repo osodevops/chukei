@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">chukei</h1>
   <p align="center">
-    The fair-source cost optimization engine for Snowflake — zero client changes
+    Snowflake cost optimization engine with verified caching, auto-suspend, and signed savings evidence
   </p>
 </p>
 
@@ -23,7 +23,21 @@
 
 ---
 
-**chukei** is a production-grade engine written in Rust that cuts your Snowflake bill automatically. It deploys as a **transparent wire-protocol proxy** in your own VPC: your drivers (JDBC, snowflake-connector-python, dbt, …) change one hostname and nothing else. Every optimization is **deterministic** — no LLM on the hot path — and every avoided dollar lands in a **cryptographically signed savings ledger**.
+**chukei** is a Snowflake cost optimization engine and transparent wire-protocol proxy written in Rust. It reduces repeated read-workload compute spend with **verified result caching**, **warehouse auto-suspend**, **SQL rewriting**, **cost attribution**, and **signed savings evidence**. It runs in your VPC: your drivers (JDBC, snowflake-connector-python, dbt, BI tools) change one hostname and nothing else.
+
+Every optimization is deterministic - no LLM on the hot path - and every avoided dollar lands in a cryptographically signed savings ledger.
+
+## What is chukei?
+
+chukei is a Snowflake-only cost optimization layer for read-heavy analytics workloads:
+
+- **Snowflake proxy** - sits between BI tools, apps, dbt, and Snowflake as a transparent wire-protocol proxy.
+- **Snowflake query caching** - serves deterministic repeated reads from a verified cache instead of paying for the same warehouse compute again.
+- **Snowflake warehouse management** - detects idle windows and suggests or executes safe warehouse auto-suspend.
+- **Snowflake cost attribution** - maps query spend to teams, users, BI tools, and dbt models without relying on perfect query-tag discipline.
+- **Snowflake FinOps evidence** - exports signed savings reports for finance, platform, and audit review.
+
+chukei is best for dashboards, reporting, ad-hoc analysis, and other repeated read workloads. It is not a Snowflake replacement, and Snowflake is the only validated launch target.
 
 ## Features
 
@@ -36,6 +50,16 @@
 - **Fail open by design** — parse errors, cache misses, plugin panics all degrade to byte-identical passthrough
 - **~2 ms p99 overhead** — deterministic Rust hot path, +5 ms budget enforced as an alert
 - **Deployment agnostic** — single static binary, distroless Docker, or Kubernetes
+
+## Common Snowflake Cost Problems chukei Targets
+
+| Problem | chukei approach |
+|---|---|
+| Repeated dashboard queries burn warehouse credits all day | Verified result caching and request coalescing for deterministic reads |
+| Warehouses stay running after traffic drops | Idle detection with suggest-only or enforce-mode warehouse auto-suspend |
+| Cost ownership is unclear | Wire-level Snowflake cost attribution by user, app, team, and dbt model |
+| Query tuning is manual and hard to prove | Deterministic SQL rewrite rules plus signed savings evidence |
+| Teams need an auditable Snowflake cost management tool | Local deployment, conservative accounting, and Ed25519 evidence bundles |
 
 ## Installation
 
@@ -153,12 +177,40 @@ chukei savings --config chukei.yaml --since 24h
 
 **chukei is the only option that combines verified caching, predictive suspend, and wire-level attribution in a single fair-source binary you run yourself — with the savings cryptographically provable.**
 
+## Fair-source License
+
+chukei is **fair-source**, not OSI open source at release time. The source is public and usable for permitted purposes, including internal production use, but the FSL license blocks using chukei to offer a competing product or hosted service. Each chukei release automatically converts to Apache-2.0 two years after that release is made available.
+
+That is why the repo says `FSL-1.1-ALv2`: Functional Source License 1.1 now, Apache License 2.0 later.
+
 ## When NOT to use chukei
 
 - **You want advice, not automation** — dashboards like [dbt-snowflake-monitoring](https://github.com/get-select/dbt-snowflake-monitoring) are simpler if a human will act on the findings
 - **Sub-millisecond latency budgets** — chukei adds ~2 ms p99; if that matters more than the bill, stay direct
 - **Large-result caching** — chunked results stream driver→cloud-storage directly and are never cached (they pass through untouched)
 - **Databricks today** — the wire adapter is on the [roadmap](docs/chukei_prd.md) (v0.2+); Snowflake is the validated target
+
+## FAQ
+
+### How does chukei reduce Snowflake costs?
+
+chukei reduces Snowflake read-workload cost by avoiding repeated warehouse compute. It verifies cache hits against live Snowflake, coalesces duplicate in-flight queries, rewrites safe SQL patterns, detects idle warehouses, and attributes every avoided credit in a signed savings ledger.
+
+### Is chukei only for Snowflake?
+
+Yes. Snowflake is the validated launch target. Other warehouses should be treated as roadmap work, not current production support.
+
+### How is chukei different from Snowflake's native result cache?
+
+Snowflake's native result cache is valuable but exact-text and session-sensitive. chukei sits in the query path, fingerprints deterministic reads structurally, invalidates on writes, and samples cache hits against live Snowflake so repeated BI and analytics traffic can reuse work across clients safely.
+
+### What workloads benefit most?
+
+Read-heavy BI dashboards, reporting jobs, repeated analyst queries, dbt model reads, and ad-hoc analytics are the best fit. Large chunked result transfers and latency-critical sub-millisecond workloads should usually stay direct.
+
+### What happens if chukei cannot make a safe decision?
+
+It fails open. Parse errors, plugin failures, cache misses, non-deterministic SQL, writes, and unsafe result shapes pass through to Snowflake.
 
 ## Documentation
 
