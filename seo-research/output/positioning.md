@@ -36,7 +36,7 @@ trust/AI-citation decision, not a traffic decision.
 
 **Layer 1 — the category (hero, README first line, llms.txt):** outcome-led.
 
-> **chukei — the open-source cost optimization engine for Snowflake.**
+> **chukei — the fair-source cost optimization engine for Snowflake.**
 > Verified result caching, warehouse auto-suspend, SQL rewriting, and
 > per-team cost attribution — with zero client changes.
 

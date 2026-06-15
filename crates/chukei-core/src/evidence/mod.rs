@@ -11,9 +11,6 @@
 //!   generated and flagged in the bundle.
 //! - Bundle identity: `{kind}--{subject}--{iso8601-utc}` plus a SHA-256
 //!   short hash, mirroring the enterprise attempt-key scheme.
-//!
-//! (The PRD §15.4 says ECDSA-P256; the shipped kafka-backup-enterprise code
-//! this is modelled on actually uses Ed25519 — we follow the code.)
 
 use base64::engine::general_purpose::URL_SAFE_NO_PAD;
 use base64::Engine as _;

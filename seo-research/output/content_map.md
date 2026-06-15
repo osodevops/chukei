@@ -5,9 +5,9 @@ as kafkabackup.com). All URLs below are relative to that root.
 
 ## Central Entity
 
-**Entity:** chukei — the open-source transparent Snowflake cost-optimization proxy
+**Entity:** chukei — the fair-source transparent Snowflake cost-optimization proxy
 **Source Context:** cut Snowflake compute spend at the wire protocol, with zero client changes
-**Central Search Intent:** learn ("why is my Snowflake bill so high / how do I reduce it") → adopt (open-source install)
+**Central Search Intent:** learn ("why is my Snowflake bill so high / how do I reduce it") → adopt (fair-source install)
 
 Positioning wedge (from discovery): every competitor is a dashboard, advisor,
 or copilot; only Sundeck shares the proxy pattern and it messages

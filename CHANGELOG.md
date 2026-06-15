@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.2] - 2026-06-15
+
+### Added
+- `chukei healthcheck`, a small HTTP probe for distroless container health
+  checks.
+
+### Fixed
+- Docker Compose health checks now use the `chukei` binary instead of tools
+  absent from distroless images.
+- The distroless image now creates `/var/lib/chukei` with non-root ownership,
+  and the Kubernetes manifest sets pod security context so the savings ledger
+  and cache can write to the mounted data volume.
+- README CLI examples now use `chukei plugins list`.
+
 ## [0.1.0] - 2026-06-11
 
 First public alpha: a transparent wire-protocol proxy for Snowflake that

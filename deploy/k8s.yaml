@@ -16,7 +16,13 @@ spec:
     metadata:
       labels: { app: chukei }
     spec:
-      terminationGracePeriodSeconds: 30 # graceful drain on SIGTERM
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65532
+        runAsGroup: 65532
+        fsGroup: 65532
+        fsGroupChangePolicy: OnRootMismatch
+      terminationGracePeriodSeconds: 30 # gives chukei's 5s drain budget room to finish
       containers:
         - name: chukei
           image: osodevops/chukei:latest
@@ -30,6 +36,8 @@ spec:
           readinessProbe:
             httpGet: { path: /healthz, port: observability }
             periodSeconds: 5
+          securityContext:
+            allowPrivilegeEscalation: false
           resources:
             requests: { cpu: 500m, memory: 256Mi }
             limits: { memory: 1Gi }

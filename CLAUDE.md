@@ -1,6 +1,6 @@
 # chukei — AI-assisted development context
 
-A transparent, wire-protocol-level proxy for Snowflake (Databricks P1) that
+A transparent, wire-protocol-level proxy for Snowflake that
 caches, routes, rewrites, right-sizes, suspends, and attributes — with zero
 client changes. Full spec: `docs/chukei_prd.md`.
 
@@ -24,7 +24,7 @@ All three must pass before any commit. CI mirrors these exactly.
 | `plugin/` | `Plugin` trait, `Decision` enum, ordered bus with precedence Veto > ServeFromCache > Route > Rewrite > SetWarehouseSize > Annotate |
 | `cache/` `router/` `rewrite/` `suspend/` `attribute/` | the P0 plugins |
 | `replay/` | offline savings simulator over `query_history` CSV |
-| `evidence/` | ECDSA-P256-SHA256 signed reports |
+| `evidence/` | Ed25519 signed reports |
 | `config.rs` | YAML config with `${VAR}` env interpolation |
 
 `crates/chukei-cli` is a thin clap wrapper; all logic lives in core.

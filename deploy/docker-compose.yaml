@@ -12,11 +12,11 @@ services:
       - /etc/chukei:/etc/chukei:ro
       - chukei-data:/var/lib/chukei
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:9090/healthz"]
+      test: ["CMD", "/usr/local/bin/chukei", "healthcheck", "--url", "http://127.0.0.1:9090/healthz"]
       interval: 10s
       timeout: 2s
       retries: 3
-    stop_grace_period: 30s # graceful drain on SIGTERM
+    stop_grace_period: 30s # gives chukei's 5s drain budget room to finish
 
 volumes:
   chukei-data:

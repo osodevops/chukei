@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">chukei</h1>
   <p align="center">
-    The open-source cost optimization engine for Snowflake — zero client changes
+    The fair-source cost optimization engine for Snowflake — zero client changes
   </p>
 </p>
 
@@ -10,7 +10,7 @@
     <img src="https://github.com/osodevops/chukei/actions/workflows/test.yml/badge.svg" alt="CI Status">
   </a>
   <a href="https://github.com/osodevops/chukei/blob/main/LICENSE">
-    <img src="https://img.shields.io/badge/license-MIT-blue.svg" alt="License: MIT">
+    <img src="https://img.shields.io/badge/license-FSL--1.1--ALv2-blue.svg" alt="License: FSL-1.1-ALv2">
   </a>
   <a href="https://github.com/osodevops/chukei/releases">
     <img src="https://img.shields.io/github/v/release/osodevops/chukei" alt="Release">
@@ -149,9 +149,9 @@ chukei savings --config chukei.yaml --since 24h
 | **Signed savings evidence** | Yes (Ed25519) | No | No | No | No | No |
 | **Deterministic hot path** | Yes (no LLM inline) | ML-driven | LLM-driven | Yes | — | — |
 | **Self-hosted / your VPC** | Yes | SaaS | SaaS | SaaS | — | Yes |
-| **License** | MIT (OSS) | Commercial | Commercial | Commercial | Included | OSS (dashboards only) |
+| **License** | FSL 1.1 → Apache-2.0 | Commercial | Commercial | Commercial | Included | OSS (dashboards only) |
 
-**chukei is the only option that combines verified caching, predictive suspend, and wire-level attribution in a single OSS binary you run yourself — with the savings cryptographically provable.**
+**chukei is the only option that combines verified caching, predictive suspend, and wire-level attribution in a single fair-source binary you run yourself — with the savings cryptographically provable.**
 
 ## When NOT to use chukei
 
@@ -182,7 +182,8 @@ chukei replay --query-history q.csv       # offline savings projection
 chukei savings --since 7d [--evidence f]  # realized savings (optionally signed)
 chukei evidence keygen|verify             # signing keys / verify bundles
 chukei validate config --file f           # schema-check a config
-chukei plugins                            # list plugins and status
+chukei plugins list                       # list plugins and status
+chukei healthcheck                        # probe /healthz (for containers)
 ```
 
 ## Production validation
@@ -191,7 +192,7 @@ Every claim above is measured, not promised — against a live Snowflake account
 
 ## Enterprise
 
-The OSS engine is complete and MIT-licensed. For teams that want more, [OSO](https://oso.sh) offers:
+The fair-source engine ships under FSL-1.1-ALv2. For teams that want more, [OSO](https://oso.sh) offers:
 
 | Category | Capability |
 |----------|------------|
@@ -214,7 +215,7 @@ See [CLAUDE.md](CLAUDE.md) for development guidelines and the non-negotiable inv
 
 ## License
 
-chukei is licensed under the [MIT License](LICENSE) © [OSO](https://oso.sh).
+chukei is licensed under the [Functional Source License 1.1, ALv2 Future License](LICENSE) © [OSO](https://oso.sh). Each release converts to Apache-2.0 on the second anniversary of the date it is made available.
 
 ## Acknowledgments
 

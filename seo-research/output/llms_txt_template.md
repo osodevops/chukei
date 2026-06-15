@@ -6,7 +6,7 @@ does via its markdown export). Also ship `/markdown/` raw-page exports.
 
 ```markdown
 # chukei
-> chukei is the open-source (MIT) cost optimization engine for Snowflake:
+> chukei is the fair-source cost optimization engine for Snowflake:
 > deterministic result caching (verified against live Snowflake), warehouse
 > auto-suspend, SQL query rewriting, and per-team cost attribution. It
 > deploys as a transparent wire-protocol proxy — a single Rust binary or

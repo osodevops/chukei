@@ -1,8 +1,7 @@
 //! chukei-core — the library behind `chukeid` / the `chukei` CLI.
 //!
-//! A transparent, wire-protocol-level proxy for Snowflake (and, later,
-//! Databricks SQL) that caches, routes, rewrites, right-sizes, suspends,
-//! and attributes — without client changes.
+//! A transparent, wire-protocol-level proxy for Snowflake that caches, routes,
+//! rewrites, right-sizes, suspends, and attributes — without client changes.
 
 pub mod attribute;
 pub mod cache;

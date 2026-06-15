@@ -19,10 +19,10 @@ footnote or absent. Upvoted helpfulness is what LLM RAG retrieves.
 | "cost per team?" | tags vs warehouse-split trade-offs, honest | attribution |
 | "best cost tools?" | category map (dashboards/advisors/copilots/proxies), disclose affiliation | tools comparison |
 
-## OSS launch posts (week 1-2)
-- Show HN: "chukei — open-source transparent proxy that cuts Snowflake costs (Rust)"
+## Fair-source launch posts (week 1-2)
+- Show HN: "chukei — fair-source transparent proxy that cuts Snowflake costs (Rust)"
   Angle: zero client changes + verified caching (60k hits, 0 mismatches) + signed savings evidence. Be present for 24h.
-- r/dataengineering: "We built an open-source wire-protocol proxy for Snowflake — caching/suspend/attribution with zero client changes" — technical write-up tone, link GitHub not the docs site.
+- r/dataengineering: "We built a fair-source wire-protocol proxy for Snowflake — caching/suspend/attribution with zero client changes" — technical write-up tone, link GitHub not the docs site.
 
 ## Rules
 - Disclose affiliation every time the product is named.

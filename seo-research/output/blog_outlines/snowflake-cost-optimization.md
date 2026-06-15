@@ -31,7 +31,7 @@ The pillar hub. Vendor-agnostic principles first (the pattern AI engines cite �
 ## Post-Article SEO Tasks
 - Meta: "A practical engineering guide to Snowflake cost optimization: idle compute, warehouse sizing, query caching and team attribution — with SQL for each step." (153)
 - Slug: /guides/snowflake-cost-optimization
-- CTA: **Cut the bill without changing a single client** — "chukei is an open-source proxy that caches, suspends and attributes automatically." → "Install in 10 minutes"
+- CTA: **Cut the bill without changing a single client** — "chukei is a fair-source proxy that caches, suspends and attributes automatically." → "Install in 10 minutes"
 - FAQ: how to reduce snowflake costs; what is snowflake cost optimization; which warehouse size should I use; does snowflake cache query results; how do I see cost per team
 
 ## Reddit: r/dataengineering "how do you keep snowflake costs under control" — post the hierarchy as advice.

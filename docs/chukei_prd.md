@@ -1,7 +1,7 @@
 <p align="center">
   <h1 align="center">chukei</h1>
   <p align="center">
-    A transparent, open-source proxy for Snowflake and Databricks that quietly cuts the bill
+    A transparent, fair-source proxy for Snowflake that quietly cuts the bill
   </p>
 </p>
 
@@ -49,7 +49,7 @@
 21. [Testing Strategy](#21-testing-strategy)
 22. [Documentation Strategy](#22-documentation-strategy)
 23. [Agent Engineering Loops (`chukei-lab`)](#23-agent-engineering-loops-chukei-lab)
-24. [Open-Source Strategy and Licensing](#24-open-source-strategy-and-licensing)
+24. [Fair-Source Strategy and Licensing](#24-fair-source-strategy-and-licensing)
 25. [Go-to-Market and SEO Hooks](#25-go-to-market-and-seo-hooks)
 26. [Enterprise Edition (chukei Pro)](#26-enterprise-edition-chukei-pro)
 27. [Milestones and Roadmap](#27-milestones-and-roadmap)
@@ -62,7 +62,7 @@
 
 ## 1. Product Summary
 
-**chukei** (中継, *chūkei*, "relay") is a transparent, OSS, wire-protocol-level proxy for Apache Snowflake and Databricks SQL. It sits between a database driver (JDBC, ODBC, snowflake-connector-python, databricks-sql-connector, etc.) and the warehouse, and **transparently** does six things, in this order:
+**chukei** (中継, *chūkei*, "relay") is a transparent, fair-source, wire-protocol-level proxy for Snowflake. It sits between a database driver (JDBC, ODBC, snowflake-connector-python, etc.) and the warehouse, and **transparently** does six things, in this order:
 
 1. **Cache** semantically-equivalent query results to Apache Iceberg.
 2. **Route** "small" reads to embedded DuckDB on Iceberg replicas, bypassing the warehouse.
@@ -71,9 +71,9 @@
 5. **Predict** idle windows and recommend / execute early auto-suspend.
 6. **Attribute** cost back to query → user → team → DAG node, exporting OpenLineage + OpenTelemetry.
 
-No client changes. No SaaS sign-up. One static binary or a container. **Same pattern as `kafka-backup`**: production-grade Rust core, thin CLI wrapper, multi-cloud storage, deployment-agnostic, MIT/BSL-licensed.
+No client changes. No SaaS sign-up. One static binary or a container. **Same pattern as `kafka-backup`**: production-grade Rust core, thin CLI wrapper, multi-cloud storage, deployment-agnostic, FSL-licensed.
 
-> **One-line pitch:** *Greybeam / Keebo / Espresso AI, but open-source, single-binary, and run by you on your own infrastructure.*
+> **One-line pitch:** *Greybeam / Keebo / Espresso AI, but fair-source, single-binary, and run by you on your own infrastructure.*
 
 ---
 
@@ -81,10 +81,9 @@ No client changes. No SaaS sign-up. One static binary or a container. **Same pat
 
 ### 2.1 The bill problem
 
-Snowflake and Databricks bills now routinely consume 5–15 % of a mid-market company's gross revenue. Public references and primary-source data from our [opportunity analysis](./snowflake_databricks_oss_opportunity.md):
+Snowflake bills now routinely consume 5–15 % of a mid-market company's gross revenue. Public references and primary-source data from our [opportunity analysis](./snowflake_databricks_oss_opportunity.md):
 
 - Auto-suspend lag alone is ~15 % of Snowflake bills ([Flexera 2025 State of the Cloud](https://www.flexera.com/blog/finops/cloud-cost-optimization-statistics)).
-- Photon's 2× DBU multiplier creates well-documented cost traps ([Miles Cole TCO analysis](https://milescole.dev)).
 - DuckDB-on-Iceberg routing has achieved 79 % cost reduction in production ([r/dataengineering case study](https://www.reddit.com/r/dataengineering/comments/1m7mw87)).
 
 ### 2.2 The market gap
@@ -137,7 +136,7 @@ OSO already has the playbook from [`kafka-backup`](https://github.com/osodevops/
 **Observability and compliance:**
 - OpenTelemetry traces, metrics, logs (OTLP exporter).
 - OpenLineage events for every query.
-- Signed compliance-evidence reports per replay run (same primitives as `kafka-backup` `evidence/` module — ECDSA P-256, JSON + PDF).
+- Signed compliance-evidence reports per replay run (Ed25519 signatures over canonical JSON evidence bundles).
 
 ### 3.2 Goals (P1, post-alpha)
 
@@ -184,9 +183,9 @@ OSO already has the playbook from [`kafka-backup`](https://github.com/osodevops/
 
 ## 5. Competitive Landscape
 
-| Tool | Layer | OSS? | Self-hostable? | Pricing | Plugin-extensible? |
+| Tool | Layer | Source model | Self-hostable? | Pricing | Plugin-extensible? |
 |---|---|---|---|---|---|
-| **chukei** | Wire-protocol proxy | ✅ BSL→Apache | ✅ | $0 self-host | ✅ Rust + Python (P1) |
+| **chukei** | Wire-protocol proxy | FSL→Apache | ✅ | $0 self-host | ✅ Rust + Python (P1) |
 | [Greybeam](https://www.greybeam.ai) | Wire-protocol proxy | ❌ | partial | $0.75/hr + $100/mo | ❌ |
 | [Keebo](https://keebo.ai) | Control-plane only | ❌ | ❌ | % of spend | ❌ |
 | [Espresso AI](https://www.espresso.ai) | Wire-protocol proxy | ❌ | ❌ | undisclosed | ❌ |
@@ -194,11 +193,11 @@ OSO already has the playbook from [`kafka-backup`](https://github.com/osodevops/
 | [Sundeck](https://www.sundeck.io) | Wire-protocol proxy | ❌ | partial | enterprise | ❌ |
 | [Revefi](https://www.revefi.com) | Observability | ❌ | ❌ | enterprise | ❌ |
 | [get-select/dbt-snowflake-monitoring](https://github.com/get-select/dbt-snowflake-monitoring) | dbt dashboards | ✅ Apache | ✅ | $0 | ❌ |
-| [silverton-io/snowflakecli](https://github.com/silverton-io/snowflakecli) | CLI utilities | ✅ MIT | ✅ | $0 | ❌ |
+| [silverton-io/snowflakecli](https://github.com/silverton-io/snowflakecli) | CLI utilities | OSS | ✅ | $0 | ❌ |
 | [databricks-labs/overwatch](https://github.com/databricks-labs/overwatch) | Databricks observability | ✅ | requires Databricks | $0 | ❌ |
 | [hystax/optscale](https://github.com/hystax/optscale) | Cloud FinOps | ✅ Apache | ✅ | $0 | partial |
 
-**chukei is the only OSS tool at the wire-protocol layer**, and the only one with a real plugin contract.
+**chukei is the only fair-source tool at the wire-protocol layer**, and the only one with a real plugin contract.
 
 ---
 
@@ -366,7 +365,7 @@ chukei/
 │   └── e2e-replay/
 ├── CLAUDE.md
 ├── CHANGELOG.md
-├── LICENSE                           # BSL-1.1 → Apache-2.0
+├── LICENSE                           # FSL-1.1-ALv2 → Apache-2.0
 └── README.md
 ```
 
@@ -824,14 +823,16 @@ Every query emits a `START` and `COMPLETE` lineage event with:
 
 ### 15.4 Compliance evidence (reuses `kafka-backup`'s pattern)
 
-`chukei replay --evidence` and `chukei evidence get` produce **signed JSON + PDF reports** suitable for:
+`chukei replay --evidence` and `chukei savings --evidence` produce
+**signed JSON evidence envelopes** suitable for:
 
 - **SOX ITGC** (change-control evidence around cost-saving infra).
 - **FinOps Foundation maturity assessments** (cost-attribution evidence).
 - **GDPR Article 32** (data-flow integrity proofs when cache is involved).
 - **M&A due-diligence** (auditable historical bill-impact narrative).
 
-Reports are signed with ECDSA-P256-SHA256, exactly the primitive `kafka-backup` already ships (`crates/kafka-backup-core/src/evidence/signing.rs`).
+Reports are signed with Ed25519 over the verbatim bundle JSON. Each envelope
+is self-contained: bundle JSON, signature, and public key.
 
 ---
 
@@ -905,8 +906,8 @@ Direct lift-and-extend from `kafka-backup`'s `Cargo.toml`, with proxy-specific a
 | Errors | `thiserror` + `anyhow` | matches kafka-backup |
 | Metrics | `prometheus-client` 0.24 | matches kafka-backup |
 | Hashing | `blake3`, `crc32fast`, `murmur2` | murmur2 for partition routing (shared) |
-| Signing | `p256` (ECDSA), `sha2` | **identical to kafka-backup** evidence module |
-| PDF | `printpdf` 0.7 | **identical to kafka-backup** evidence module |
+| Signing | `ed25519-dalek`, `sha2` | Ed25519 signatures over canonical JSON evidence bundles |
+| PDF | n/a for P0 | Signed JSON evidence bundles are the shipped report format |
 | HTTP client (webhooks) | `reqwest` | matches kafka-backup |
 | UUID | `uuid` v4 | matches kafka-backup |
 | Testing | `testcontainers`, `tokio-test`, `tempfile` | matches kafka-backup |
@@ -925,9 +926,9 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
-license = "BUSL-1.1"
+license = "FSL-1.1-ALv2"
 authors = ["OSO"]
-description = "Open-source, transparent Snowflake/Databricks query proxy"
+description = "Fair-source, transparent Snowflake query proxy"
 repository = "https://github.com/osodevops/chukei"
 homepage = "https://chukei.dev"
 
@@ -1049,7 +1050,7 @@ Match `kafka-backup-docs` structure: docs live in a separate repo, published as 
 
 ## 23. Agent Engineering Loops (`chukei-lab`)
 
-chukei ships with a first-class research subsystem, `chukei-lab`, that turns the proxy into a self-improving cost-optimisation platform. The thesis: the most valuable cost-saving rules in Snowflake/Databricks are not the ones we wrote at v0.1; they are the ones an LLM-driven agent will discover by mining replay corpora, proposing rewrites, validating them in a sandbox, and submitting PRs against the rule pack.
+chukei ships with a first-class research subsystem, `chukei-lab`, that turns the proxy into a self-improving cost-optimisation platform. The thesis: the most valuable cost-saving rules in Snowflake are not the ones we wrote at v0.1; they are the ones an LLM-driven agent will discover by mining replay corpora, proposing rewrites, validating them in a sandbox, and submitting PRs against the rule pack.
 
 This is the explicit mechanism by which chukei out-iterates Greybeam, Keebo, Espresso, and SELECT.dev. They guard a closed rule set behind a SaaS. We open the rule-discovery loop to the community and let agents contribute.
 
@@ -1102,7 +1103,7 @@ Extends the P0 `bandit` plugin from online operation to offline discovery. Given
 - Replays representative samples against the policy in a simulator (warehouse cost model derived from Snowflake credit pricing + `query_history` runtime distributions).
 - Uses Thompson sampling / LinUCB to explore the policy space.
 - Promotes converged policies as proposed defaults for a workload signature.
-- **Reference:** [Bao (MIT, 2020)](https://dl.acm.org/doi/10.1145/3448016.3452838) — learned query optimiser using contextual bandits over hint sets.
+- **Reference:** [Bao (2020)](https://dl.acm.org/doi/10.1145/3448016.3452838) — learned query optimiser using contextual bandits over hint sets.
 
 #### 23.3.3 LLM-proposed plugins via the PyO3 host
 
@@ -1122,7 +1123,7 @@ When budget allows, the lab can train a small ONNX model (matches the existing v
 The sandbox is the safety boundary that lets agents iterate freely without ever touching production:
 
 - **Input:** a Parquet/CSV dump of `SNOWFLAKE.ACCOUNT_USAGE.QUERY_HISTORY` (or the Databricks equivalent), plus optional anonymised result hashes for equivalence checking.
-- **Isolation:** the sandbox runs in its own process, with no network access to Snowflake/Databricks; all "execution" is simulated via the cost model.
+- **Isolation:** the sandbox runs in its own process, with no network access to Snowflake; all "execution" is simulated via the cost model.
 - **Determinism:** every run is reproducible from `(corpus_hash, rule_pack_version, seed)`.
 - **Storage:** sandbox artefacts (proposed rules, validation reports, traces) live under `~/.chukei/lab/runs/<run_id>/`.
 - **Cost cap:** every run is bounded by `lab.max_runtime_minutes` and `lab.max_llm_tokens`; the agent host (LLM) is rate-limited via the user's own API key.
@@ -1137,7 +1138,7 @@ This is the non-negotiable section. Agents are creative; production traffic is n
 | **Cost-delta confidence** | Proposed change must show a statistically significant cost reduction (Wilcoxon signed-rank, p < 0.05) on the workload corpus | Automated in `chukei lab validate` |
 | **Plan-regression guard** | No fingerprint in the corpus may regress beyond a configurable threshold (`lab.max_tail_regression: 1.5x`) | Automated in `chukei lab validate` |
 | **Two-maintainer review** | Every agent-authored PR requires two human approvals before merge to `main` | GitHub branch protection |
-| **Signed evidence report** | The PR must include a signed (ECDSA-P256-SHA256) JSON+PDF report — same `evidence/` module as kafka-backup — describing the proposal, the corpus, the validation outcome | Automated in CI |
+| **Signed evidence report** | The PR must include a signed Ed25519 JSON evidence envelope describing the proposal, the corpus, and the validation outcome | Automated in CI |
 | **Rule-pack versioning** | Agent-authored rules ship in a separately-versioned `chukei-rules-community` pack; users opt in by adding `rule_packs: [community]` to `chukei.yaml` | Default config ships with `rule_packs: [core]` only |
 | **Kill switch** | `chukei rule disable <rule_id>` works instantly, persisted in state DB | Operator |
 
@@ -1225,7 +1226,7 @@ These feed back into the loop: a rule whose live `chukei_lab_cost_delta_pct` dev
 
 ### 23.10 Community angle
 
-`chukei-lab` is also a flywheel for the open-source project:
+`chukei-lab` is also a flywheel for the fair-source project:
 
 - **Community rule pack repo** (`osodevops/chukei-rules-community`) accepts agent-authored PRs from any contributor.
 - **Public leaderboard** at [chukei.dev/lab/leaderboard](https://chukei.dev/lab/leaderboard) — ranks contributors by total measured cost savings across all deployed instances that opt in to anonymous telemetry.
@@ -1259,24 +1260,22 @@ The lab is async, cold-path, and opt-in. Default config sets `lab.enabled: false
 
 ---
 
-## 24. Open-Source Strategy and Licensing
+## 24. Fair-Source Strategy and Licensing
 
-### 24.1 Licence: BSL 1.1 → Apache-2.0 (3-year auto-conversion)
+### 24.1 Licence: FSL 1.1 → Apache-2.0 (2-year auto-conversion)
 
-> **Decision 2026-06-11 (supersedes this section):** chukei ships under
-> **MIT**, matching kafka-backup's actual licence. The BSL analysis below is
-> kept for the record; we traded the 3-year SaaS-resale moat for
-> friction-free adoption — the kafka-backup playbook. Revisit if a hosted
-> chukei service becomes the commercial model.
+> **Decision 2026-06-15:** chukei ships under **FSL-1.1-ALv2**. Each version
+> converts to Apache-2.0 on the second anniversary of the date it is made
+> available.
 
-- **Why BSL?** It blocks Snowflake/Databricks/Keebo/Greybeam/Espresso from forking the data plane and reselling it as a SaaS for 3 years. After 3 years each release auto-converts to Apache-2.0, so the OSS commitment is real and irreversible.
-- **Same model as:** [Sentry](https://blog.sentry.io/2019/11/06/relicensing-sentry/), MariaDB MaxScale, [Bloomberg's bsl-license](https://github.com/bloomberg/bsl-license).
-- **What's allowed under BSL:**
+- **Why FSL?** It blocks Snowflake, Keebo, Greybeam, Espresso, and adjacent commercial vendors from forking the data plane and reselling it as a competing commercial service. After 2 years each release auto-converts to Apache-2.0, so the permissive commitment is real and irreversible.
+- **Same model as:** [Sentry's FSL](https://fsl.software/), with Apache-2.0 as the future license.
+- **What's allowed under FSL:**
   - Self-hosting for production use ✅
   - Modifying the source ✅
   - Internal SaaS offerings ✅
-  - Forking and republishing under BSL ✅
-- **What's not allowed under BSL until 3-year auto-conversion:**
+  - Forking and republishing under FSL ✅
+- **What's not allowed under FSL until 2-year auto-conversion:**
   - Offering chukei as a hosted commercial service to third parties ❌
 
 ### 24.2 Contribution model
@@ -1316,7 +1315,7 @@ Driven by the [`wharf_mvp_and_seo.md`](./wharf_mvp_and_seo.md) keyword research.
 
 ## 26. Enterprise Edition (chukei Pro)
 
-Same pattern as `kafka-backup`'s "Enterprise Edition" footer in its README — a clear, dignified upsell that doesn't pollute the OSS core.
+Same pattern as `kafka-backup`'s "Enterprise Edition" footer in its README — a clear, dignified upsell that doesn't pollute the fair-source core.
 
 | Feature category | Enterprise capability |
 |---|---|
@@ -1331,7 +1330,7 @@ Same pattern as `kafka-backup`'s "Enterprise Edition" footer in its README — a
 | | Log shipping (Datadog, Splunk, Grafana Loki) |
 | | Advanced web control plane (cost dashboards, drill-down UI) |
 | | Kubernetes Operator |
-| **Support** | 24/7 SLA-backed support and dedicated Snowflake/Databricks consulting |
+| **Support** | 24/7 SLA-backed support and dedicated Snowflake cost consulting |
 
 The footer copy mirrors kafka-backup:
 
@@ -1384,10 +1383,10 @@ The footer copy mirrors kafka-backup:
 | R-4 | Iceberg writes are slow on first cache fill | High | Low | Optional "cache_writer" warehouse. Fall back to async S3 + manifest job. Document a "warm-up" phase. |
 | R-5 | sqlglot's Snowflake↔DuckDB coverage isn't 100 % | High | Medium | Router falls back to Snowflake whenever transpilation fails. Coverage % per release published as marketing artefact. |
 | R-6 | "Yet another proxy" objection — installation friction kills adoption | High | High | Pizzeria test: install must be <10 minutes; demo must show "$ saved in 1 hour." Replay CLI lets people see savings *before* installing the proxy. |
-| R-7 | Commercial competitors hire away or sue | Low | High | BSL licence + clean-room dev + careful patent landscape review. Same posture OSO has on kafka-backup. |
+| R-7 | Commercial competitors hire away or sue | Low | High | FSL licence + clean-room dev + careful patent landscape review. Same posture OSO has on kafka-backup. |
 | R-8 | Snowflake ships a native cache that obsoletes the project | Low–Medium | High | Differentiate on (a) cross-warehouse cost attribution, (b) DuckDB routing — Snowflake will not bypass itself, (c) plugin extensibility. |
 | R-9 | Latency overhead exceeds 5 ms p99 budget | Medium | High | Hot-path budget enforced as a CI gate via `criterion` benchmarks. Plugins that fail the budget cannot ship. |
-| R-10 | OSS contributors are scared off by Rust + Snowflake protocol complexity | Medium | Medium | PyO3 plugin host (P1) lowers the bar. Curated `good first issue` queue, weekly office hours. |
+| R-10 | Community contributors are scared off by Rust + Snowflake protocol complexity | Medium | Medium | PyO3 plugin host (P1) lowers the bar. Curated `good first issue` queue, weekly office hours. |
 
 ---
 
@@ -1442,7 +1441,7 @@ The footer copy mirrors kafka-backup:
 4. **Pricing for Pro.** Mirror kafka-backup Pro structure or differentiate?
 5. **Hosted demo / playground.** Should we operate a public, throwaway Snowflake account that runs chukei for the docs site's "try it" button?
 6. **Snowflake Marketplace listing.** Once mature, do we publish a Snowflake Native App for the cost-attribution side?
-7. **Snowflake partnership.** Do we approach Snowflake's OSS / partner team proactively, or wait until traction makes the conversation easier?
+7. **Snowflake partnership.** Do we approach Snowflake's developer / partner team proactively, or wait until traction makes the conversation easier?
 8. **Trademark.** Is "chukei" trademarkable for software in our key jurisdictions (US, UK, EU)? Check before the launch post.
 
 ---
@@ -1474,7 +1473,7 @@ The footer copy mirrors kafka-backup:
 - DuckDB Iceberg reader: [duckdb.org/docs/extensions/iceberg](https://duckdb.org/docs/extensions/iceberg.html)
 - Apache Iceberg Rust: [github.com/apache/iceberg-rust](https://github.com/apache/iceberg-rust)
 - OpenLineage: [openlineage.io](https://openlineage.io)
-- BSL 1.1: [mariadb.com/bsl11](https://mariadb.com/bsl11/)
+- FSL 1.1 ALv2: [fsl.software](https://fsl.software/)
 - cargo-dist: [opensource.axo.dev/cargo-dist](https://opensource.axo.dev/cargo-dist/)
 
 **OSO prior art:**

@@ -6,11 +6,11 @@ members = [
 ]
 
 [workspace.package]
-version = "0.2.1"
+version = "0.2.2"
 edition = "2021"
-license = "MIT"
+license = "FSL-1.1-ALv2"
 authors = ["OSO"]
-description = "Open-source cost optimization engine for Snowflake — verified caching, auto-suspend, SQL rewriting, attribution; deploys as a transparent proxy"
+description = "Fair-source cost optimization engine for Snowflake — verified caching, auto-suspend, SQL rewriting, attribution; deploys as a transparent proxy"
 repository = "https://github.com/osodevops/chukei"
 homepage = "https://chukei.dev"
 

@@ -3,11 +3,7 @@ use clap::{Parser, Subcommand};
 mod commands;
 
 #[derive(Parser)]
-#[command(
-    name = "chukei",
-    version,
-    about = "Transparent Snowflake/Databricks query proxy"
-)]
+#[command(name = "chukei", version, about = "Transparent Snowflake query proxy")]
 struct Cli {
     #[command(subcommand)]
     command: Commands,
@@ -29,6 +25,8 @@ enum Commands {
     Evidence(commands::evidence::EvidenceArgs),
     /// Realized savings recorded by the running proxy
     Savings(commands::savings::SavingsArgs),
+    /// Probe a chukei health endpoint (for container health checks)
+    Healthcheck(commands::healthcheck::HealthcheckArgs),
     /// Generate shell completions (bash, zsh, fish, …)
     Completions {
         #[arg(value_enum)]
@@ -54,6 +52,7 @@ async fn main() {
         Commands::Plugins(args) => commands::plugins::run(args).await,
         Commands::Evidence(args) => commands::evidence::run(args).await,
         Commands::Savings(args) => commands::savings::run(args).await,
+        Commands::Healthcheck(args) => commands::healthcheck::run(args).await,
         Commands::Completions { shell } => {
             use clap::CommandFactory;
             clap_complete::generate(shell, &mut Cli::command(), "chukei", &mut std::io::stdout());
