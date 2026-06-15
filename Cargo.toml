@@ -43,7 +43,7 @@ uuid = { version = "1", features = ["v4", "serde"] }
 ed25519-dalek = { version = "2", features = ["rand_core"] }
 base64 = "0.22"
 sha2 = "0.10"
-rand = "0.8"
+rand = "0.9"
 tempfile = "3"
 
 [profile.dist]
