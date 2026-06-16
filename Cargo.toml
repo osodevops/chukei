@@ -1,0 +1,51 @@
+[workspace]
+resolver = "2"
+members = [
+  "crates/chukei-core",
+  "crates/chukei-cli",
+]
+
+[workspace.package]
+version = "0.2.2"
+edition = "2021"
+license = "Apache-2.0"
+authors = ["OSO"]
+description = "Open source cost optimization engine for Snowflake — verified caching, auto-suspend, SQL rewriting, attribution; deploys as a transparent proxy"
+repository = "https://github.com/osodevops/chukei"
+homepage = "https://chukei.dev"
+
+[workspace.dependencies]
+tokio = { version = "1", features = ["full"] }
+axum = "0.8"
+axum-server = { version = "0.8", features = ["tls-rustls"] }
+rustls = { version = "0.23", default-features = false, features = ["ring", "std", "tls12"] }
+rcgen = "0.14"
+hyper = "1"
+reqwest = { version = "0.12", default-features = false, features = ["rustls-tls", "json", "stream"] }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde_yaml = "0.9"
+sqlparser = { version = "0.62", features = ["visitor"] }
+blake3 = "1"
+flate2 = "1"
+prometheus-client = "0.24"
+rusqlite = { version = "0.40", features = ["bundled"] }
+clap_complete = "4"
+thiserror = "2"
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+async-trait = "0.1"
+csv = "1"
+chrono = { version = "0.4", features = ["serde"] }
+uuid = { version = "1", features = ["v4", "serde"] }
+ed25519-dalek = { version = "2", features = ["rand_core"] }
+base64 = "0.22"
+sha2 = "0.10"
+rand = "0.8"
+tempfile = "3"
+
+[profile.dist]
+inherits = "release"
+lto = "thin"

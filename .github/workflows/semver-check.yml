@@ -1,0 +1,29 @@
+name: Semver Check
+
+permissions:
+  contents: read
+
+on:
+  pull_request:
+    paths:
+      - 'crates/chukei-core/src/**'
+      - 'crates/chukei-core/Cargo.toml'
+
+jobs:
+  semver-check:
+    name: Detect Breaking Changes
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Need full history for baseline comparison
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: stable
+
+      - name: Check semver compatibility
+        uses: obi1kenobi/cargo-semver-checks-action@v2
+        with:
+          package: chukei-core

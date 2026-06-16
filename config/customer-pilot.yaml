@@ -1,0 +1,82 @@
+# chukei customer-pilot profile — the conservative defaults for a first
+# deployment. Every lever that trades safety for savings starts on its
+# safe side; docs/deployment.md describes when and how to turn each up.
+#
+# Fill in the three CHANGE-ME values; everything else works as shipped.
+
+listen:
+  bind: "0.0.0.0:8443"
+  tls:
+    cert: "/etc/chukei/tls.crt"        # CHANGE ME: cert your clients trust
+    key: "/etc/chukei/tls.key"
+
+upstream:
+  snowflake:
+    account: "CHANGE-ME.eu-west-2.aws" # your account locator incl. region
+    # client auth passes through verbatim; no credentials here, ever
+
+storage:
+  backend: filesystem
+  path: "/var/lib/chukei"
+
+coalesce:
+  enabled: true
+  scope: session                # RLS-safe; `account` only after review
+
+savings:
+  enabled: true
+  db_path: "/var/lib/chukei/savings.db"
+  usd_per_credit: 3.0           # CHANGE ME: your contracted rate
+  conservative_factor: 0.7      # deliberate under-claiming; leave for pilot
+  default_warehouse_size: M
+  warehouse_sizes: {}           # add your real sizes for accurate $ figures
+
+plugins:
+  cache:
+    enabled: true
+    default_ttl_secs: 900
+    determinism_gate: strict    # never relax during a pilot
+    blame_sample_rate: 0.05     # 5% of hits double-checked upstream
+    max_entries: 10000
+    # Cache persistence is OFF for the pilot (no result data at rest).
+    # When enabling later: deploy on an encrypted volume; chukei creates
+    # the dir 0700 and entries 0600.
+    # persist_path: "/var/lib/chukei/cache"
+
+  router:
+    enabled: false              # post-pilot feature
+
+  rewrite:
+    enabled: true
+    rules: [all]                # all rules are equivalence-tested
+    experimental:
+      llm_rewrite: false        # never on the hot path
+
+  suspend:
+    enabled: true
+    mode: suggest-only          # REQUIRED for week one. Flip to enforce
+    role: CHUKEI_SUSPENDER      # only after reviewing the suggest log;
+    sweep_interval_secs: 30     # enforce also needs service_account below.
+
+  attribute:
+    enabled: true
+    auto_query_tag: true
+    dbt_metadata_parser: true
+    sources: [hint_comment, application_name, dbt_meta]
+
+# Uncomment for suspend.mode: enforce (week two):
+# service_account:
+#   user: "${CHUKEI_SVC_USER}"
+#   password: "${CHUKEI_SVC_PASSWORD}"
+#   role: CHUKEI_SUSPENDER
+
+observability:
+  prometheus:
+    enabled: true
+    port: 9090                  # /metrics + /healthz
+
+evidence:
+  enabled: true
+  signing:
+    enabled: false              # enable before generating customer reports
+  retention_days: 2555

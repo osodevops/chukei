@@ -1,0 +1,1 @@
+# Creates /var/lib/chukei with nonroot ownership in the distroless image.

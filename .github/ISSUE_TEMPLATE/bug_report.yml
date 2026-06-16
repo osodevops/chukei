@@ -1,0 +1,65 @@
+name: Bug report
+description: Report reproducible behavior that looks wrong.
+title: "bug: "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include credentials, private query text, account locators, or customer data.
+  - type: input
+    id: version
+    attributes:
+      label: chukei version
+      placeholder: "chukei 0.2.2"
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - proxy
+        - cache
+        - rewrite
+        - suspend
+        - attribution
+        - evidence
+        - CLI
+        - Docker/Kubernetes
+        - docs
+        - other
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: reproduce
+    attributes:
+      label: Reproduction steps
+      description: Use a synthetic query or redacted fixture.
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant logs or output
+      render: text
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed credentials, private query text, account locators, and customer data.
+          required: true

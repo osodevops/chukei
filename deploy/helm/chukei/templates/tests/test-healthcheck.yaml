@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "chukei.fullname" . }}-test-healthcheck"
+  labels:
+    {{- include "chukei.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  restartPolicy: Never
+  containers:
+    - name: healthcheck
+      image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+      imagePullPolicy: {{ .Values.image.pullPolicy }}
+      command:
+        - /usr/local/bin/chukei
+      args:
+        - healthcheck
+        - --url
+        - http://{{ include "chukei.fullname" . }}:{{ .Values.service.observabilityPort }}/healthz

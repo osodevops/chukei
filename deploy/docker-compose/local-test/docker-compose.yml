@@ -1,0 +1,27 @@
+# Local "Snowflake" + chukei for development and protocol testing.
+#
+# Snowflake itself cannot run locally; this stack uses the Go
+# snowflake-emulator (DuckDB-backed) which implements the full session
+# lifecycle (/session/v1/login-request, token-request, heartbeat, renew,
+# logout) plus /queries/v1/query-request — the same endpoints chukei
+# proxies. For a Python-centric alternative, see fakesnow server mode in
+# scripts/integration-fakesnow.sh.
+#
+#   docker compose up -d
+#   chukei up --config chukei.yaml     # upstream override → :8080
+#
+# Drivers then connect to chukei with protocol=http (or TLS, if you mount a
+# cert into chukei.yaml) and arbitrary credentials — the emulator skips auth.
+
+services:
+  snowflake-emulator:
+    image: ghcr.io/nnnkkk7/snowflake-emulator:latest
+    ports:
+      - "8080:8080"
+    environment:
+      DB_PATH: /data/snowflake.db
+    volumes:
+      - snowflake-data:/data
+
+volumes:
+  snowflake-data:

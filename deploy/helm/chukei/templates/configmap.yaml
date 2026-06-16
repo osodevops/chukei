@@ -1,0 +1,12 @@
+{{- if not .Values.existingConfigSecret }}
+apiVersion: v1
+kind: Secret
+metadata:
+  name: {{ include "chukei.fullname" . }}-config
+  labels:
+    {{- include "chukei.labels" . | nindent 4 }}
+type: Opaque
+stringData:
+  {{ .Values.configSecretKey }}: |
+    {{- toYaml .Values.config | nindent 4 }}
+{{- end }}

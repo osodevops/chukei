@@ -1,0 +1,93 @@
+# chukei example configuration — see docs for the full reference.
+# Values support env-var interpolation (dollar-brace syntax, as in
+# secret_key: "${S3_SECRET_KEY}"); unset vars are a startup error.
+# Any field can also be overridden with CHUKEI_* env vars
+# (CHUKEI_LISTEN_BIND, CHUKEI_PLUGINS_CACHE_ENABLED, ...).
+
+listen:
+  bind: "0.0.0.0:8443"
+  # Terminate TLS with a customer-owned cert (required for real drivers):
+  # tls:
+  #   cert: "/etc/chukei/tls.crt"
+  #   key:  "/etc/chukei/tls.key"
+
+upstream:
+  snowflake:
+    account: "abc12345.us-east-1"
+    # client auth is passed through; no client credentials here
+
+# chukei's own service account — only needed for suspend.mode: enforce.
+# service_account:
+#   user: "${CHUKEI_SVC_USER}"
+#   password: "${CHUKEI_SVC_PASSWORD}"
+#   role: CHUKEI_SUSPENDER
+
+storage:
+  backend: filesystem          # s3 | azure | gcs | filesystem
+  path: "/var/lib/chukei"
+
+# In-flight coalescing: concurrent identical deterministic reads share one
+# upstream execution. `session` scope is RLS-safe; `account` is opt-in.
+coalesce:
+  enabled: true
+  scope: session
+
+# Realized-savings ledger: every avoided execution is priced conservatively
+# and queryable via `chukei savings`.
+savings:
+  enabled: true
+  db_path: "/var/lib/chukei/savings.db"
+  usd_per_credit: 3.0
+  conservative_factor: 0.7     # under-claim: discount for warm-warehouse overlap
+  default_warehouse_size: M
+  warehouse_sizes:             # tell chukei your sizes for accurate pricing
+    BI_WH: M
+    TRANSFORM_WH: L
+
+plugins:
+  cache:
+    enabled: true
+    default_ttl_secs: 900
+    table_ttls:
+      "ANALYTICS.MARTS.*": 86400
+    determinism_gate: strict
+    blame_sample_rate: 0.01    # 1% of cache hits double-checked upstream
+    max_entries: 10000
+    persist_path: "/var/lib/chukei/cache"   # survives restarts
+
+  router:
+    enabled: false             # enable once Iceberg replicas exist
+    duckdb:
+      enabled: false
+      replicas: []
+
+  rewrite:
+    enabled: true
+    rules: [all]
+    experimental:
+      llm_rewrite: false       # never on the hot path; off by default
+
+  suspend:
+    enabled: true
+    mode: suggest-only         # suggest-only | enforce (needs role + service_account)
+    role: CHUKEI_SUSPENDER
+    sweep_interval_secs: 30
+
+  attribute:
+    enabled: true
+    auto_query_tag: true
+    dbt_metadata_parser: true
+    sources: [hint_comment, application_name, dbt_meta]
+
+observability:
+  prometheus:
+    enabled: true
+    port: 9090                 # /metrics + /healthz on this port
+
+evidence:
+  enabled: true
+  signing:
+    enabled: false
+    # Raw 32-byte Ed25519 seed; create with `chukei evidence keygen --out …`
+    # private_key_path: "/etc/chukei/signing.key"
+  retention_days: 2555         # 7 years (SOX)

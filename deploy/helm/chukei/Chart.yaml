@@ -1,0 +1,14 @@
+apiVersion: v2
+name: chukei
+description: Apache-2.0 Snowflake cost optimization proxy
+type: application
+version: 0.1.0
+appVersion: "0.2.2"
+home: https://github.com/osodevops/chukei
+sources:
+  - https://github.com/osodevops/chukei
+maintainers:
+  - name: OSO
+    url: https://oso.sh
+annotations:
+  licenses: Apache-2.0

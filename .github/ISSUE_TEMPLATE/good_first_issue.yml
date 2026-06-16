@@ -1,0 +1,35 @@
+name: Good first issue candidate
+description: Propose a small contribution task.
+title: "good first issue: "
+labels:
+  - good-first-issue
+  - help-wanted
+body:
+  - type: textarea
+    id: task
+    attributes:
+      label: Task
+      description: What should be changed?
+    validations:
+      required: true
+  - type: textarea
+    id: files
+    attributes:
+      label: Likely files
+      description: Point contributors at the smallest useful area.
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: What proves this is done?
+    validations:
+      required: true
+  - type: checkboxes
+    id: scope
+    attributes:
+      label: Scope check
+      options:
+        - label: This does not require access to a real Snowflake account.
+          required: true
+        - label: This is small enough for a first contribution.
+          required: true
