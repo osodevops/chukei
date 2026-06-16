@@ -12,7 +12,6 @@ Pick one:
 
 ```bash
 docker pull osodevops/chukei:latest          # distroless, runs as non-root
-brew install osodevops/tap/chukei            # macOS
 curl --proto '=https' --tlsv1.2 -LsSf \
   https://github.com/osodevops/chukei/releases/latest/download/chukei-cli-installer.sh | sh
 ```

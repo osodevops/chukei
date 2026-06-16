@@ -65,12 +65,6 @@ chukei is best for dashboards, reporting, ad-hoc analysis, and other repeated re
 
 Download the latest binary from the [GitHub Releases](https://github.com/osodevops/chukei/releases) page.
 
-### macOS (Homebrew)
-
-```bash
-brew install osodevops/tap/chukei
-```
-
 ### Linux / macOS (Shell Installer)
 
 ```bash
@@ -81,13 +75,6 @@ curl --proto '=https' --tlsv1.2 -LsSf https://github.com/osodevops/chukei/releas
 
 ```powershell
 powershell -ExecutionPolicy ByPass -c "irm https://github.com/osodevops/chukei/releases/latest/download/chukei-cli-installer.ps1 | iex"
-```
-
-### Windows (Scoop)
-
-```powershell
-scoop bucket add oso https://github.com/osodevops/scoop-bucket.git
-scoop install chukei
 ```
 
 ### Docker
