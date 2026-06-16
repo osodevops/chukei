@@ -10,7 +10,7 @@ allow-dirty = ["ci"]
 # CI backends to support
 ci = "github"
 # The installers to generate for each app
-installers = ["shell", "powershell", "homebrew"]
+installers = ["shell", "powershell"]
 # Target platforms to build apps for (Rust target-triple syntax)
 targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
 # Path that installers should place binaries in
@@ -19,9 +19,3 @@ install-path = "CARGO_HOME"
 hosting = "github"
 # Whether to install an updater program
 install-updater = false
-# Homebrew tap repository for publishing formulas
-tap = "osodevops/homebrew-tap"
-# Custom formula name (instead of chukei-cli)
-formula = "chukei"
-# Publish jobs to run (updates homebrew tap automatically)
-publish-jobs = ["homebrew"]

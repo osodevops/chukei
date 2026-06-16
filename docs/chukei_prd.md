@@ -954,8 +954,6 @@ Reuse `kafka-backup`'s [cargo-dist](https://opensource.axo.dev/cargo-dist/) rele
 - Cross-compiled artifacts for `x86_64-linux-gnu`, `aarch64-linux-gnu`, `x86_64-apple-darwin`, `aarch64-apple-darwin`, `x86_64-pc-windows-msvc`.
 - Shell installer (`curl … | sh`) and PowerShell installer.
 - GitHub release with checksums.
-- macOS Homebrew tap (`osodevops/tap/chukei`).
-- Windows Scoop bucket (`osodevops/scoop-bucket`).
 - Distroless Docker image at `osodevops/chukei`.
 
 ### 20.2 Version policy (lifted from `kafka-backup` `CLAUDE.md`)
