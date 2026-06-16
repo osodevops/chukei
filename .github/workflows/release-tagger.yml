@@ -29,8 +29,10 @@ jobs:
           set -euo pipefail
 
           BASE_REF="${{ github.event.before }}"
-          if [[ "$BASE_REF" =~ ^0+$ ]]; then
-            BASE_REF="$(git rev-list --max-parents=0 HEAD | head -n1)"
+          if [[ "$BASE_REF" =~ ^0+$ ]] || ! git cat-file -e "${BASE_REF}^{commit}" 2> /dev/null; then
+            echo "No reachable base commit for this push; skipping automatic release tagging."
+            echo "VERSION_CHANGED=false" >> "$GITHUB_ENV"
+            exit 0
           fi
 
           python3 scripts/ci/check-release-version.py \
