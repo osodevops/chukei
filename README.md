@@ -63,7 +63,14 @@ chukei is best for dashboards, reporting, ad-hoc analysis, and other repeated re
 
 ## Installation
 
-Download the latest binary from the [GitHub Releases](https://github.com/osodevops/chukei/releases) page.
+Install with Homebrew, Docker, the shell installer, or prebuilt archives from
+the [GitHub Releases](https://github.com/osodevops/chukei/releases) page.
+
+### macOS / Linux (Homebrew)
+
+```bash
+brew install osodevops/tap/chukei
+```
 
 ### Linux / macOS (Shell Installer)
 

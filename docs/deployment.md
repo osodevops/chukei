@@ -11,6 +11,7 @@ queries depend on.
 Pick one:
 
 ```bash
+brew install osodevops/tap/chukei             # macOS/Linux via Homebrew
 docker pull osodevops/chukei:latest          # distroless, runs as non-root
 curl --proto '=https' --tlsv1.2 -LsSf \
   https://github.com/osodevops/chukei/releases/latest/download/chukei-cli-installer.sh | sh
