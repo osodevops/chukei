@@ -9,11 +9,11 @@ on:
       tag:
         description: "Docker tag to publish, normally the Git release tag"
         required: true
-        default: "v0.2.2"
+        default: "v0.2.3"
       source_ref:
         description: "Git ref to build from"
         required: true
-        default: "v0.2.2"
+        default: "v0.2.3"
       push_latest:
         description: "Also push latest and vMAJOR.MINOR tags"
         required: true

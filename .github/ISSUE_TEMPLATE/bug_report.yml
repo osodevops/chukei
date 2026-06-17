@@ -12,7 +12,7 @@ body:
     id: version
     attributes:
       label: chukei version
-      placeholder: "chukei 0.2.2"
+      placeholder: "chukei 0.2.3"
     validations:
       required: true
   - type: dropdown

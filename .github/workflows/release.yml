@@ -375,13 +375,78 @@ jobs:
 
           gh release create "$TAG" --target "$RELEASE_COMMIT" $PRERELEASE_FLAG --title "$ANNOUNCEMENT_TITLE" --notes-file "$RUNNER_TEMP/notes.txt" artifacts/*
 
+  publish-homebrew-formula:
+    needs:
+      - plan
+      - host
+    runs-on: "ubuntu-22.04"
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PLAN: ${{ needs.plan.outputs.val }}
+      GITHUB_USER: "axo bot"
+      GITHUB_EMAIL: "admin+bot@axo.dev"
+    if: ${{ needs.plan.outputs.publishing == 'true' }}
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          persist-credentials: true
+          repository: "osodevops/homebrew-tap"
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+      - name: Fetch homebrew formulae
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c # v8
+        with:
+          pattern: artifacts-*
+          path: Formula/
+          merge-multiple: true
+      - name: Commit formula files
+        run: |
+          git config --global user.name "${GITHUB_USER}"
+          git config --global user.email "${GITHUB_EMAIL}"
+
+          echo "$PLAN" | jq --compact-output '.releases[] | select([.artifacts[] | endswith(".rb")] | any)' | while read -r release; do
+            filename=$(echo "$release" | jq '.artifacts[] | select(endswith(".rb"))' --raw-output)
+            name=$(echo "$filename" | sed "s/\.rb$//")
+            version=$(echo "$release" | jq .app_version --raw-output)
+
+            export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
+            brew update
+            # Preserve cargo-dist generated metadata while letting Homebrew fix layout.
+            brew style --except-cops FormulaAudit/Homepage,FormulaAudit/Desc,FormulaAuditStrict --fix "Formula/${filename}" || true
+
+            git add "Formula/${filename}"
+            if git diff --cached --quiet; then
+              echo "No Homebrew formula changes for ${name} ${version}"
+            else
+              git commit -m "${name} ${version}"
+            fi
+          done
+          git push
+
+  publish-scoop-manifest:
+    needs:
+      - plan
+      - host
+    runs-on: "ubuntu-22.04"
+    env:
+      GH_TOKEN: ${{ github.token }}
+      PLAN: ${{ needs.plan.outputs.val }}
+    if: ${{ needs.plan.outputs.publishing == 'true' }}
+    steps:
+      - name: Trigger Scoop bucket update
+        uses: peter-evans/repository-dispatch@28959ce8df70de7be546dd1250a005dd32156697 # v4
+        with:
+          token: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+          repository: osodevops/scoop-bucket
+          event-type: update-chukei-manifest
+          client-payload: '{"ref": "${{ github.ref }}", "sha": "${{ github.sha }}", "tag": "${{ needs.plan.outputs.tag }}"}'
+
   # Build and push Docker image to Docker Hub
   publish-docker:
     needs:
       - plan
       - host
     runs-on: ubuntu-latest
-    if: ${{ false }}
+    if: ${{ needs.plan.outputs.publishing == 'true' }}
     env:
       REGISTRY: docker.io
       IMAGE_NAME: osodevops/chukei
@@ -452,11 +517,13 @@ jobs:
     needs:
       - plan
       - host
+      - publish-homebrew-formula
+      - publish-scoop-manifest
       - publish-docker
     # use "always() && ..." to allow us to wait for all publish jobs while
     # still allowing individual publish jobs to skip themselves (for prereleases).
     # "host" however must run to completion, no skipping allowed!
-    if: ${{ always() && needs.host.result == 'success' && (needs.publish-docker.result == 'skipped' || needs.publish-docker.result == 'success') }}
+    if: ${{ always() && needs.host.result == 'success' && (needs.publish-homebrew-formula.result == 'skipped' || needs.publish-homebrew-formula.result == 'success') && (needs.publish-scoop-manifest.result == 'skipped' || needs.publish-scoop-manifest.result == 'success') && (needs.publish-docker.result == 'skipped' || needs.publish-docker.result == 'success') }}
     runs-on: "ubuntu-22.04"
     env:
       GH_TOKEN: ${{ github.token }}

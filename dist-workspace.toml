@@ -23,3 +23,5 @@ install-updater = false
 tap = "osodevops/homebrew-tap"
 # Custom formula name (instead of chukei-cli)
 formula = "chukei"
+# Publish jobs to run (updates homebrew tap automatically)
+publish-jobs = ["homebrew"]

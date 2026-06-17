@@ -13,7 +13,7 @@ name = "chukei"
 path = "src/main.rs"
 
 [dependencies]
-chukei-core = { version = "0.2.2", path = "../chukei-core" }
+chukei-core = { version = "0.2.3", path = "../chukei-core" }
 tokio.workspace = true
 clap.workspace = true
 clap_complete.workspace = true
