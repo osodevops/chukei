@@ -410,6 +410,7 @@ jobs:
 
             export PATH="/home/linuxbrew/.linuxbrew/bin:$PATH"
             brew update
+            ruby -0pi -e 'gsub(/^  desc .*/, %{  desc "Snowflake cost optimization proxy with verified caching"})' "Formula/${filename}"
             # Preserve cargo-dist generated metadata while letting Homebrew fix layout.
             brew style --except-cops FormulaAudit/Homepage,FormulaAudit/Desc,FormulaAuditStrict --fix "Formula/${filename}" || true
 
