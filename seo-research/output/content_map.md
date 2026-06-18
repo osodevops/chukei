@@ -109,6 +109,46 @@ result caching with correctness proof**, **inline SQL rewriting**,
 
 ---
 
+## Architecture section (7 pages) — fully specified
+
+GEO note (2026-06-18 audit): "wire-protocol proxy" is genuinely uncontested by
+Snowflake's own content; the strict suspend>size>cache>rewrite hierarchy is not
+canonical anywhere. Own both. Architecture pages are informational/educational and
+bridge to the product (P5) and to the proxy/security guides.
+
+| Page (URL `/docs/architecture/...`) | Target keyword (vol/KD) | Intent | Diagram | Links to |
+|---|---|---|---|---|
+| overview | snowflake proxy architecture (long-tail) / snowflake architecture (720, KD 33 outer bridge) | informational | end-to-end request path + fail-open | all arch pages, P5 getting-started |
+| wire-protocol-shim | wire protocol proxy (zero comp) / database proxy (1300 RDS-dominated) | informational | login/query/result/abort sequence vs passthrough | overview, security-model, P2 caching |
+| plugin-bus | (long-tail "snowflake query plugin") | informational | Decision precedence flow | overview, reference/plugins |
+| fingerprinting | deterministic query caching (wedge) | informational | hard blake3 vs soft LSH pipeline | P2 caching pillar, plugin-bus |
+| fail-open-design | fail open proxy (zero comp) | informational | failure-mode → passthrough decision tree | overview, troubleshooting |
+| request-coalescing | (long-tail) | informational | concurrent identical-query timeline | overview, P2 |
+| security-model (absorbs proxy-safety) | snowflake proxy security / snowflake security (480, KD 49 bridge) | informational | credential/session in-memory boundary + TLS | overview, deployment/tls |
+
+## Well-Architected section (12 pages) — fully specified
+
+Positioning (post-GEO audit): Snowflake publishes its own "Well-Architected
+Framework / cost pillar" — do NOT compete on the generic phrase. chukei's wedge is
+the **enforceable** framework: every principle maps to a deterministic mechanism
+(a chukei plugin) and a quotable checklist, not just advice. Target the opinionated
+hierarchy + best-practices long-tail Snowflake's docs under-serve.
+
+| Page (URL `/docs/well-architected/...`) | Target keyword (vol/KD) | Intent | Quotable artifact |
+|---|---|---|---|
+| index | snowflake best practices (170, KD 21) / snowflake cost optimization framework | commercial/info | the suspend>size>cache>rewrite hierarchy diagram |
+| visibility | snowflake cost visibility / query history cost analysis (480, KD 24) | informational | METERING/QUERY_HISTORY SQL recipe |
+| attribution | snowflake cost attribution by team (wedge) | informational | per-team/per-dbt-model attribution table |
+| elimination | reduce snowflake costs (50, KD 20) / snowflake idle warehouse | informational | "queries you should never run on Snowflake" do/don't |
+| efficiency | snowflake warehouse sizing (140, KD 26) / query optimization (110, KD 23) | informational | warehouse size→credit rate table |
+| governance | snowflake finops (40, KD 18) / chargeback showback | commercial | governance maturity checklist |
+| maturity-model | (long-tail "snowflake finops maturity") | informational | ad-hoc→measured→managed→optimized scorecard |
+| checklist-visibility, -attribution, -elimination, -efficiency, -governance (5) | "snowflake cost checklist" long-tail | informational | one copy-paste checklist + SQL each |
+
+Internal linking: index → 5 pillars + maturity; each pillar → its checklist + the
+matching cost guide (P1–P4) + the enforcing chukei plugin in reference/. Every page
+ends with the standard replay-simulator CTA.
+
 ## Docs site structure (Docusaurus, mirrors kafka-backup-docs; ~88 pages)
 
 | Section | Pages | Content |
