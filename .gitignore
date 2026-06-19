@@ -10,3 +10,4 @@ pilot*.key
 *.evidence.json
 .env
 __pycache__/
+seo-research/
